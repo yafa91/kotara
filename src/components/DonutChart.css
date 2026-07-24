@@ -1,0 +1,59 @@
+.donut-conteneur {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.donut-svg {
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.donut-total-label {
+  font-size: 9px;
+  fill: #999;
+}
+
+.donut-total-valeur {
+  font-size: 12px;
+  font-weight: 700;
+  fill: #333;
+}
+
+.donut-legende {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 180px;
+}
+
+.donut-legende-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.donut-legende-pastille {
+  width: 10px;
+  height: 10px;
+  border-radius: 5px;
+  flex-shrink: 0;
+}
+
+.donut-legende-label {
+  flex: 1;
+  color: #333;
+}
+
+.donut-legende-valeur {
+  color: #999;
+  font-weight: 600;
+}
+
+.donut-vide {
+  color: #999;
+  font-size: 13px;
+}

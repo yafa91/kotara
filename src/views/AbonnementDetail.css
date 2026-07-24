@@ -1,0 +1,94 @@
+.abonnement-detail {
+  padding: 32px;
+  max-width: 720px;
+}
+
+.abonnement-retour {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.abonnement-retour:hover {
+  color: #FF9500;
+}
+
+.abonnement-detail h2 {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.abonnement-echeance {
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 28px;
+}
+
+.plans-grille {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.plan-carte {
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.plan-carte-actif {
+  border: 2px solid #FF9500;
+}
+
+.plan-nom {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.plan-prix {
+  font-size: 15px;
+  color: #555;
+  margin: 0 0 16px;
+}
+
+.plan-fonctionnalites {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  flex-grow: 1;
+}
+
+.plan-fonctionnalites li {
+  font-size: 13px;
+  color: #444;
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.plan-bouton {
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #FF9500;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.plan-bouton:hover {
+  background: #e08600;
+}
+
+.plan-bouton-desactive {
+  background: #e5e5e5;
+  color: #999;
+  cursor: default;
+}

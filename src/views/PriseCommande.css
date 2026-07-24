@@ -1,0 +1,530 @@
+.prise-commande {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 16px;
+  padding: 20px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.prise-commande-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.prise-commande-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.categories-row {
+  display: flex;
+  gap: 8px;
+}
+
+.categorie-chip {
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+
+.categorie-chip-actif {
+  background: #FF9500;
+  border-color: #FF9500;
+  color: #fff;
+}
+
+.grille-articles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.carte-article {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.carte-article-icone {
+  width: 100%;
+  height: 54px;
+  border-radius: 8px;
+  background: #FFF3E0;
+  color: #FF9500;
+  font-weight: 700;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.carte-article-nom {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.carte-article-prix {
+  font-size: 12px;
+  color: #777;
+  margin: 4px 0 0;
+}
+
+.ticket-panel {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+}
+
+.ticket-panel h3 {
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+
+.ticket-vide {
+  font-size: 13px;
+  color: #999;
+}
+
+.ticket-ligne {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ticket-ligne-nom {
+  font-size: 13px;
+  margin: 0;
+  color: #333;
+}
+
+.ticket-ligne-prix {
+  font-size: 12px;
+  color: #777;
+  margin: 2px 0 0;
+}
+
+.ticket-ligne-qte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ticket-ligne-qte button {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  background: #FFF3E0;
+  color: #FF9500;
+  cursor: pointer;
+}
+
+.ticket-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0 4px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.bouton-principal,
+.bouton-secondaire {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.bouton-principal {
+  background: #333;
+  color: #fff;
+}
+
+.bouton-secondaire {
+  background: #FF9500;
+  color: #fff;
+}
+
+.bouton-principal:disabled,
+.bouton-secondaire:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.carte-article-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.ticket-entete-resto {
+  text-align: center;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px dashed #e5e5e5;
+}
+
+.ticket-resto-nom {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0;
+  color: #333;
+}
+
+.ticket-resto-adresse {
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0 0;
+}
+
+.ticket-entete-numero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ticket-numero {
+  font-size: 12px;
+  font-weight: 700;
+  color: #FF9500;
+  background: #FFF3E0;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+
+.message-confirmation {
+  font-size: 12px;
+  color: #3B6D11;
+  background: #EAF3DE;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 10px;
+}
+
+.titre-paiement {
+  font-size: 12px;
+  color: #777;
+  margin: 12px 0 6px;
+}
+
+.boutons-paiement {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bouton-paiement {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+}
+
+.bouton-espece {
+  background: #3B6D11;
+}
+
+.bouton-mobile {
+  background: #0B6FA1;
+}
+
+.bouton-attente {
+  background: #8E8E93;
+}
+
+.bouton-paiement:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ticket-numero {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FF9500;
+  margin-bottom: 10px;
+}
+
+.boutons-paiement {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.bouton-paiement {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bouton-espece {
+  background: #3B6D11;
+  color: #fff;
+}
+
+.bouton-mobile {
+  background: #0057A3;
+  color: #fff;
+}
+
+.bouton-attente {
+  background: #fff;
+  color: #777;
+  border: 1px solid #e5e5e5;
+}
+
+.bouton-paiement:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Cartes plus petites */
+.grille-articles {
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.carte-article {
+  padding: 8px;
+}
+
+.carte-article-icone {
+  height: 70px;
+  margin-bottom: 6px;
+}
+
+.carte-article-nom {
+  font-size: 12px;
+}
+
+.carte-article-prix {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+/* Refonte du panneau ticket pour un affichage plus propre */
+.prise-commande {
+  grid-template-columns: 1fr 280px;
+}
+
+.ticket-panel {
+  width: 280px;
+  box-sizing: border-box;
+}
+
+.ticket-lignes {
+  max-height: calc(100vh - 340px);
+  overflow-y: auto;
+}
+
+.ticket-ligne {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.ticket-ligne-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ticket-ligne-nom {
+  font-size: 13px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ticket-ligne-prix {
+  font-size: 12px;
+  color: #999;
+  margin: 2px 0 0;
+}
+
+.ticket-ligne-qte {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ticket-ligne-qte button {
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  border: 1px solid #e5e5e5;
+  background: #FFF3E0;
+  color: #FF9500;
+  font-size: 13px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ticket-ligne-qte span {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 14px;
+  text-align: center;
+}
+
+.ticket-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 0 4px;
+  font-weight: 700;
+  font-size: 15px;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 8px;
+}
+
+/* Layout pleine largeur pour le menu (plus de colonne fixe) */
+.prise-commande-fullwidth {
+  padding: 20px;
+  position: relative;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.prise-commande-fullwidth .grille-articles {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* Bouton panier flottant */
+.panier-flottant {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  background: #FF9500;
+  border: none;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  transition: transform 0.15s ease;
+}
+
+.panier-flottant:hover {
+  transform: scale(1.05);
+}
+
+.panier-flottant-cache {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.panier-flottant-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  background: #C0433F;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  border: 2px solid #F8F9FA;
+}
+
+/* Overlay + panneau ticket flottant */
+.ticket-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 60;
+}
+
+.ticket-panel-flottant {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  background: #fff;
+  z-index: 70;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  animation: glisser-panier 0.2s ease;
+}
+
+@keyframes glisser-panier {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.ticket-panel-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.ticket-fermer {
+  width: 28px;
+  height: 28px;
+  border-radius: 14px;
+  border: none;
+  background: #f5f5f5;
+  color: #666;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.categories-row {
+  flex-wrap: wrap;
+}

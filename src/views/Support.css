@@ -1,0 +1,37 @@
+.support {
+  padding: 32px;
+  max-width: 480px;
+}
+
+.support h2 {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.support-intro {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 28px;
+}
+
+.support-carte {
+  background: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+
+.support-label {
+  font-size: 12px;
+  color: #999;
+  margin: 0 0 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.support-valeur {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}

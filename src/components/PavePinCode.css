@@ -1,0 +1,57 @@
+.pave-pin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 0 4px;
+}
+
+.pave-pin-dots {
+  display: flex;
+  gap: 14px;
+}
+
+.pave-pin-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 8px;
+  border: 1.5px solid #FF9500;
+  background: transparent;
+}
+
+.pave-pin-dot-remplie {
+  background: #FF9500;
+}
+
+.pave-pin-clavier {
+  display: grid;
+  grid-template-columns: repeat(3, 56px);
+  gap: 10px;
+}
+
+.pave-pin-touche {
+  width: 56px;
+  height: 56px;
+  border-radius: 28px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+}
+
+.pave-pin-touche:active {
+  background: #f0f0f0;
+}
+
+.pave-pin-touche-vide {
+  border: none;
+  background: transparent;
+  cursor: default;
+}
+
+.pave-pin-touche-effacer {
+  font-size: 16px;
+  color: #999;
+}

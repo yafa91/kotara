@@ -1,0 +1,85 @@
+.paiement-mockup {
+  padding: 32px;
+  max-width: 420px;
+}
+
+.paiement-retour {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+}
+
+.paiement-retour:hover {
+  color: #FF9500;
+}
+
+.paiement-mockup h2 {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.paiement-recap {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.paiement-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.paiement-form label {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.paiement-form input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.paiement-ligne {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.paiement-bouton {
+  margin-top: 8px;
+  padding: 13px;
+  border: none;
+  border-radius: 10px;
+  background: #FF9500;
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.paiement-bouton:hover {
+  background: #e08600;
+}
+
+.paiement-bouton:disabled {
+  background: #f0b968;
+  cursor: default;
+}
+
+.paiement-note {
+  font-size: 12px;
+  color: #999;
+  margin-top: 16px;
+  text-align: center;
+}

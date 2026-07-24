@@ -1,0 +1,36 @@
+
+.support-carte-distance {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+}
+
+.support-description {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 12px;
+}
+
+.support-bouton {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #FF9500;
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.support-bouton:hover {
+  background: #e08600;
+}
+
+.support-badge-premium {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #f0f0f0;
+  color: #999;
+  font-size: 12px;
+  font-weight: 600;
+}
