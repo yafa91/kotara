@@ -7,20 +7,14 @@ import type { VueActive } from './components/Sidebar';
 import PriseCommande from './views/PriseCommande';
 import MenuProduits from './views/MenuProduits';
 import Caisse from './views/Caisse';
+import Historique from './views/Historique';
+import Rapports from './views/Rapports';
+import Employes from './views/Employes';
 import ServiceFerme from './components/ServiceFerme';
 import SplashScreen from './components/SplashScreen';
 import LoginScreen from './components/LoginScreen';
 import { useService } from './store/AppDataContext';
 import './App.css';
-
-function VuePlaceholder({ titre }: { titre: string }) {
-  return (
-    <div className="vue-placeholder">
-      <h2>{titre}</h2>
-      <p>Bientôt disponible</p>
-    </div>
-  );
-}
 
 export default function App() {
   const [vueActive, setVueActive] = useState<VueActive>('commande');
@@ -52,13 +46,13 @@ export default function App() {
       case 'caisse':
         return <Caisse />;
       case 'historique':
-        return <VuePlaceholder titre="Historique" />;
+        return <Historique />;
       case 'menu':
         return <MenuProduits />;
       case 'employes':
-        return <VuePlaceholder titre="Employés" />;
+        return <Employes />;
       case 'rapports':
-        return <VuePlaceholder titre="Rapports" />;
+        return <Rapports />;
       case 'comptabilite':
         return <Comptabilite planActuel={planActuel} />;
       case 'parametres':

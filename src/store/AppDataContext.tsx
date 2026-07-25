@@ -10,13 +10,20 @@ interface EtatService {
 interface Parametres {
   nomResto: string;
   adresseResto: string;
+  telephoneResto: string;
   codeAdmin: string;
+  logoUrl?: string;
+  identifiantCompte: string;
+  motDePasseCompte: string;
 }
 
 const PARAMETRES_PAR_DEFAUT: Parametres = {
   nomResto: 'Chez Mama Kotara',
   adresseResto: "Avenue de l'Indépendance, Bangui",
+  telephoneResto: '+236 70 00 00 00',
   codeAdmin: '1234',
+  identifiantCompte: 'admin',
+  motDePasseCompte: 'admin',
 };
 
 function dateDuJour() {
@@ -74,6 +81,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     lire('kotara_service', { ouvert: false, date: '' })
   );
   const [clotures, setClotures] = useState<Cloture[]>(() => lire('kotara_clotures', []));
+  const [employes, setEmployes] = useState<Employe[]>(() => lire('kotara_employes', []));
   const [sortiesCaisse, setSortiesCaisse] = useState<SortieCaisse[]>(() =>
     lire('kotara_sorties_caisse', [])
   );
@@ -103,6 +111,10 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem('kotara_clotures', JSON.stringify(clotures));
   }, [clotures]);
+
+  useEffect(() => {
+    window.localStorage.setItem('kotara_employes', JSON.stringify(employes));
+  }, [employes]);
   useEffect(() => {
     window.localStorage.setItem('kotara_parametres', JSON.stringify(parametres));
   }, [parametres]);
@@ -202,6 +214,24 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setService((prev) => ({ ...prev, ouvert: false }));
   };
 
+  const ajouterEmploye: AppDataValue['ajouterEmploye'] = (nom, code, role) => {
+    setEmployes((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), nom, code, role, actif: true },
+    ]);
+  };
+
+  const modifierEmploye: AppDataValue['modifierEmploye'] = (id, changements) => {
+    setEmployes((prev) => prev.map((e) => (e.id === id ? { ...e, ...changements } : e)));
+  };
+
+  const supprimerEmploye: AppDataValue['supprimerEmploye'] = (id) => {
+    setEmployes((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const trouverEmployeParCode = (code: string) =>
+    employes.find((e) => e.code === code && e.actif) || null;
+
   const modifierParametres: AppDataValue['modifierParametres'] = (changements) => {
     setParametres((prev) => ({ ...prev, ...changements }));
   };
@@ -284,6 +314,12 @@ export function useService() {
   const { serviceOuvertAujourdHui, demarrerService, cloturerServiceAvecComptage, clotures } =
     useAppData();
   return { serviceOuvertAujourdHui, demarrerService, cloturerServiceAvecComptage, clotures };
+}
+
+export function useEmployes() {
+  const { employes, ajouterEmploye, modifierEmploye, supprimerEmploye, trouverEmployeParCode } =
+    useAppData();
+  return { employes, ajouterEmploye, modifierEmploye, supprimerEmploye, trouverEmployeParCode };
 }
 
 export function useParametres() {

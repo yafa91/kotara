@@ -48,3 +48,13 @@ export interface SortieCaisse {
   date: string; // yyyy-mm-dd
   dateCreation: string; // ISO
 }
+
+export type RoleEmploye = 'employe' | 'gerant';
+
+export interface Employe {
+  id: string;
+  nom: string;
+  code: string; // PIN à 4 chiffres, personnel
+  role: RoleEmploye;
+  actif: boolean;
+}

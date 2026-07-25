@@ -1,0 +1,156 @@
+.historique {
+  padding: 24px;
+}
+
+.historique-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.historique-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.selecteur-date {
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+
+.historique-recap {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.historique-recap-carte {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.historique-recap-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.historique-recap-valeur {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+
+.historique-filtres {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.historique-recherche {
+  flex: 1;
+  min-width: 200px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.historique-filtre-paiement {
+  display: flex;
+  gap: 8px;
+}
+
+.filtre-chip {
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.filtre-chip-actif {
+  background: #FF9500;
+  border-color: #FF9500;
+  color: #fff;
+}
+
+.historique-vide {
+  text-align: center;
+  padding: 60px 0;
+  color: #999;
+  font-size: 14px;
+}
+
+.historique-liste {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.historique-carte-ticket {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.historique-carte-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.historique-carte-numero {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+}
+
+.historique-carte-heure {
+  font-size: 12px;
+  color: #999;
+  flex: 1;
+}
+
+.historique-carte-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 12px;
+}
+
+.historique-carte-ligne {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.historique-carte-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 8px 0 0;
+  border-top: 1px dashed #e5e5e5;
+  margin-top: 8px;
+}

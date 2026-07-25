@@ -17,6 +17,11 @@ const CATEGORIES: ('Tout' | Categorie)[] = [
   'Autres',
 ];
 
+const LABELS_PAIEMENT: Record<'espece' | 'mobile_money', string> = {
+  espece: 'Espèces',
+  mobile_money: 'Mobile Money',
+};
+
 export default function PriseCommande() {
   const [categorieActive, setCategorieActive] = useState<'Tout' | Categorie>('Tout');
   const { articles } = useMenu();
@@ -25,6 +30,9 @@ export default function PriseCommande() {
   const { parametres } = useParametres();
 
   const [ticketOuvert, setTicketOuvert] = useState(false);
+  const [modePaiementChoisi, setModePaiementChoisi] = useState<'espece' | 'mobile_money' | null>(
+    null
+  );
 
   const articlesFiltres = articles.filter(
     (a) => a.actif && (categorieActive === 'Tout' || a.categorie === categorieActive)
@@ -34,18 +42,18 @@ export default function PriseCommande() {
 
   const formatPrix = (n: number) => `${n.toLocaleString('fr-FR')} FCFA`;
 
-  const handleValider = (mode: ModePaiement) => {
-    if (lignes.length === 0) return;
-    const numero = encaisser(lignes, total, mode);
+  const handleImprimerEtEncaisser = () => {
+    if (lignes.length === 0 || !modePaiementChoisi) return;
+
+    encaisser(lignes, total, modePaiementChoisi as ModePaiement);
+
+    // window.print() est bloquant : le code reprend seulement une fois
+    // la boîte de dialogue d'impression fermée par l'utilisateur.
+    window.print();
+
     viderTicket();
     setTicketOuvert(false);
-
-    const libelles: Record<ModePaiement, string> = {
-      espece: 'payé en espèces',
-      mobile_money: 'payé en Mobile Money',
-      en_attente: 'mis en attente (à encaisser depuis la Caisse)',
-    };
-    alert(`Ticket n°${numero} enregistré — ${libelles[mode]}`);
+    setModePaiementChoisi(null);
   };
 
   return (
@@ -110,6 +118,7 @@ export default function PriseCommande() {
             <div className="ticket-entete-resto">
               <p className="ticket-resto-nom">{parametres.nomResto}</p>
               <p className="ticket-resto-adresse">{parametres.adresseResto}</p>
+              <p className="ticket-resto-telephone">{parametres.telephoneResto}</p>
             </div>
 
             <div className="ticket-numero">Ticket n°{prochainNumero}</div>
@@ -154,28 +163,58 @@ export default function PriseCommande() {
               <span>{formatPrix(total)}</span>
             </div>
 
-            <div className="boutons-paiement">
+            <p className="ticket-choix-paiement-label">Mode de règlement</p>
+            <div className="boutons-choix-paiement">
               <button
-                className="bouton-paiement bouton-espece"
-                disabled={lignes.length === 0}
-                onClick={() => handleValider('espece')}
+                className={`bouton-choix bouton-choix-espece ${
+                  modePaiementChoisi === 'espece' ? 'bouton-choix-actif' : ''
+                }`}
+                onClick={() => setModePaiementChoisi('espece')}
               >
                 Espèces
               </button>
               <button
-                className="bouton-paiement bouton-mobile"
-                disabled={lignes.length === 0}
-                onClick={() => handleValider('mobile_money')}
+                className={`bouton-choix bouton-choix-mobile ${
+                  modePaiementChoisi === 'mobile_money' ? 'bouton-choix-actif' : ''
+                }`}
+                onClick={() => setModePaiementChoisi('mobile_money')}
               >
                 Mobile Money
               </button>
-              <button
-                className="bouton-paiement bouton-attente"
-                disabled={lignes.length === 0}
-                onClick={() => handleValider('en_attente')}
-              >
-                En attente
-              </button>
+            </div>
+
+            <button
+              className="bouton-paiement bouton-imprimer"
+              disabled={lignes.length === 0 || !modePaiementChoisi}
+              onClick={handleImprimerEtEncaisser}
+            >
+              🖨️ Imprimer le ticket
+            </button>
+
+            {/* Zone visible uniquement à l'impression */}
+            <div className="zone-impression">
+              <p className="impression-nom">{parametres.nomResto}</p>
+              <p className="impression-adresse">{parametres.adresseResto}</p>
+              <p className="impression-telephone">{parametres.telephoneResto}</p>
+              <p className="impression-numero">Ticket n°{prochainNumero}</p>
+              <hr />
+              {lignes.map((ligne) => (
+                <div key={ligne.articleId} className="impression-ligne">
+                  <span>
+                    {ligne.quantite}x {ligne.nom}
+                  </span>
+                  <span>{formatPrix(ligne.prixUnitaire * ligne.quantite)}</span>
+                </div>
+              ))}
+              <hr />
+              <div className="impression-total">
+                <span>Total</span>
+                <span>{formatPrix(total)}</span>
+              </div>
+              <p className="impression-paiement">
+                Mode de règlement :{' '}
+                {modePaiementChoisi ? LABELS_PAIEMENT[modePaiementChoisi] : ''}
+              </p>
             </div>
           </div>
         </>

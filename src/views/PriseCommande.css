@@ -528,3 +528,129 @@
 .categories-row {
   flex-wrap: wrap;
 }
+
+.bouton-imprimer {
+  background: #333;
+  color: #fff;
+}
+
+.ticket-resto-telephone {
+  font-size: 12px;
+  color: #999;
+  margin: 2px 0 0;
+}
+
+.ticket-choix-paiement-label {
+  font-size: 12px;
+  color: #999;
+  margin: 14px 0 6px;
+}
+
+.boutons-choix-paiement {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bouton-choix {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  border: 2px solid #e5e5e5;
+  background: #fff;
+  color: #666;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.bouton-choix-espece.bouton-choix-actif {
+  border-color: #3B6D11;
+  background: #EAF3DE;
+  color: #3B6D11;
+}
+
+.bouton-choix-mobile.bouton-choix-actif {
+  border-color: #0057A3;
+  background: #E6F0FA;
+  color: #0057A3;
+}
+
+.bouton-imprimer {
+  width: 100%;
+  background: #333;
+  color: #fff;
+}
+
+.bouton-imprimer:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Zone d'impression : invisible à l'écran, visible seulement sur papier */
+.zone-impression {
+  display: none;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .zone-impression,
+  .zone-impression * {
+    visibility: visible;
+  }
+  .zone-impression {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+  }
+  .impression-nom {
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+  }
+  .impression-adresse,
+  .impression-telephone {
+    font-size: 12px;
+    text-align: center;
+    color: #333;
+    margin: 2px 0;
+  }
+  .impression-numero {
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    margin: 10px 0;
+  }
+  .impression-ligne {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin: 4px 0;
+  }
+  .impression-total {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 700;
+    font-size: 14px;
+    margin: 10px 0;
+  }
+  .impression-paiement {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 10px;
+  }
+}
+
+.ticket-ligne-multiplicateur {
+  font-size: 13px;
+  font-weight: 700;
+  color: #FF9500;
+  flex-shrink: 0;
+}

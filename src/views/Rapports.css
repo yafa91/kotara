@@ -1,0 +1,88 @@
+.rapports {
+  padding: 24px;
+}
+
+.rapports-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.rapports-header h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.rapports-periode {
+  display: flex;
+  gap: 8px;
+}
+
+.periode-chip {
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+}
+
+.periode-chip-actif {
+  background: #FF9500;
+  border-color: #FF9500;
+  color: #fff;
+}
+
+.rapports-grille {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.rapports-carte {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rapports-label {
+  font-size: 12px;
+  color: #999;
+}
+
+.rapports-valeur {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+}
+
+.rapports-carte-accent {
+  background: #FFF3E0;
+  border-color: #FFD9A8;
+}
+
+.rapports-carte-accent .rapports-valeur {
+  color: #FF9500;
+}
+
+.rapports-section {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.rapports-section h3 {
+  font-size: 15px;
+  margin: 0 0 16px;
+}
