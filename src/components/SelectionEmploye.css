@@ -1,0 +1,87 @@
+.selection-employe {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F9FA;
+}
+
+.selection-employe-carte {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.selection-employe-carte h2 {
+  font-size: 20px;
+  margin: 0 0 6px;
+  color: #333;
+}
+
+.selection-employe-sous-titre {
+  font-size: 13px;
+  color: #999;
+  margin: 0 0 24px;
+}
+
+.selection-employe-grille {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.selection-employe-tuile {
+  padding: 18px 12px;
+  border-radius: 12px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+}
+
+.selection-employe-tuile:hover {
+  border-color: #FF9500;
+}
+
+.selection-employe-tuile-gerant {
+  background: #FFF3E0;
+  border-color: #FFD9A8;
+  color: #FF9500;
+  grid-column: span 2;
+}
+
+.selection-employe-vide {
+  font-size: 12px;
+  color: #999;
+  margin-top: 16px;
+}
+
+.selection-employe-erreur {
+  color: #C0433F;
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.selection-employe-retour {
+  margin-top: 20px;
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.selection-employe-deconnexion {
+  margin-top: 24px;
+  background: none;
+  border: none;
+  color: #C0433F;
+  font-size: 13px;
+  cursor: pointer;
+}

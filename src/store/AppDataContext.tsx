@@ -1,6 +1,14 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { MENU_PAR_DEFAUT } from '../data/defaultMenu';
-import type { ArticleMenu, Cloture, Commande, LigneTicket, ModePaiement, SortieCaisse } from '../types';
+import type {
+  ArticleMenu,
+  Cloture,
+  Commande,
+  Employe,
+  LigneTicket,
+  ModePaiement,
+  SortieCaisse,
+} from '../types';
+import { supabase } from '../lib/supabaseClient';
 
 interface EtatService {
   ouvert: boolean;
@@ -39,19 +47,41 @@ function lire<T>(cle: string, valeurParDefaut: T): T {
   }
 }
 
+// Convertit une ligne de la table Supabase "menu" en ArticleMenu utilisé par l'app
+function ligneMenuVersArticle(ligne: any): ArticleMenu {
+  return {
+    id: ligne.id,
+    nom: ligne.nom,
+    prix: Number(ligne.prix),
+    categorie: ligne.categorie,
+    icone: '',
+    photo: ligne.photo_url || undefined,
+    actif: ligne.actif,
+  };
+}
+
 interface AppDataValue {
   menu: ArticleMenu[];
-  ajouterArticleMenu: (nom: string, prix: number, categorie: ArticleMenu['categorie'], photo?: string) => void;
-  modifierArticleMenu: (id: string, changements: Partial<ArticleMenu>) => void;
-  supprimerArticleMenu: (id: string) => void;
+  menuCharge: boolean;
+  ajouterArticleMenu: (
+    nom: string,
+    prix: number,
+    categorie: ArticleMenu['categorie'],
+    photo?: string
+  ) => Promise<void>;
+  modifierArticleMenu: (id: string, changements: Partial<ArticleMenu>) => Promise<void>;
+  supprimerArticleMenu: (id: string) => Promise<void>;
+
   ticket: LigneTicket[];
   ajouterArticleTicket: (article: ArticleMenu) => void;
   retirerArticleTicket: (articleId: string) => void;
   viderTicket: () => void;
+
   commandes: Commande[];
   prochainNumero: number;
   encaisser: (lignes: LigneTicket[], total: number, mode: ModePaiement) => number;
   marquerPayee: (id: string, mode: 'espece' | 'mobile_money') => void;
+
   serviceOuvertAujourdHui: boolean;
   demarrerService: () => void;
   cloturerServiceAvecComptage: (params: {
@@ -60,18 +90,120 @@ interface AppDataValue {
     totalMobileMoney: number;
     totalGeneral: number;
   }) => void;
+
   clotures: Cloture[];
+
   parametres: Parametres;
   modifierParametres: (changements: Partial<Parametres>) => void;
   verifierCodeAdmin: (code: string) => boolean;
+
   sortiesCaisse: SortieCaisse[];
   ajouterSortieCaisse: (motif: string, montant: number) => void;
+
+  employes: Employe[];
+  ajouterEmploye: (nom: string, code: string, role: Employe['role']) => void;
+  modifierEmploye: (id: string, changements: Partial<Employe>) => void;
+  supprimerEmploye: (id: string) => void;
+  trouverEmployeParCode: (code: string) => Employe | null;
 }
 
 const AppDataContext = createContext<AppDataValue | undefined>(undefined);
 
-export function AppDataProvider({ children }: { children: ReactNode }) {
-  const [menu, setMenu] = useState<ArticleMenu[]>(() => lire('kotara_menu', MENU_PAR_DEFAUT));
+export function AppDataProvider({
+  children,
+  restaurantId,
+}: {
+  children: ReactNode;
+  restaurantId: string;
+}) {
+  // ---- MENU (Supabase) ----
+  const [menu, setMenu] = useState<ArticleMenu[]>([]);
+  const [menuCharge, setMenuCharge] = useState(false);
+
+  useEffect(() => {
+    let annule = false;
+
+    (async () => {
+      setMenuCharge(false);
+      const { data, error } = await supabase
+        .from('menu')
+        .select('*')
+        .eq('restaurant_id', restaurantId)
+        .order('created_at', { ascending: true });
+
+      if (annule) return;
+
+      if (error) {
+        console.error('Erreur chargement menu :', error.message);
+        setMenu([]);
+      } else {
+        setMenu((data || []).map(ligneMenuVersArticle));
+      }
+      setMenuCharge(true);
+    })();
+
+    return () => {
+      annule = true;
+    };
+  }, [restaurantId]);
+
+  const ajouterArticleMenu: AppDataValue['ajouterArticleMenu'] = async (
+    nom,
+    prix,
+    categorie,
+    photo
+  ) => {
+    const { data, error } = await supabase
+      .from('menu')
+      .insert({
+        restaurant_id: restaurantId,
+        nom,
+        prix,
+        categorie,
+        photo_url: photo || null,
+        actif: true,
+      })
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Erreur ajout article menu :', error.message);
+      return;
+    }
+
+    setMenu((prev) => [...prev, ligneMenuVersArticle(data)]);
+  };
+
+  const modifierArticleMenu: AppDataValue['modifierArticleMenu'] = async (id, changements) => {
+    const payload: Record<string, unknown> = {};
+    if (changements.nom !== undefined) payload.nom = changements.nom;
+    if (changements.prix !== undefined) payload.prix = changements.prix;
+    if (changements.categorie !== undefined) payload.categorie = changements.categorie;
+    if (changements.photo !== undefined) payload.photo_url = changements.photo || null;
+    if (changements.actif !== undefined) payload.actif = changements.actif;
+
+    const { error } = await supabase.from('menu').update(payload).eq('id', id);
+
+    if (error) {
+      console.error('Erreur modification article menu :', error.message);
+      return;
+    }
+
+    setMenu((prev) => prev.map((a) => (a.id === id ? { ...a, ...changements } : a)));
+  };
+
+  const supprimerArticleMenu: AppDataValue['supprimerArticleMenu'] = async (id) => {
+    const { error } = await supabase.from('menu').delete().eq('id', id);
+
+    if (error) {
+      console.error('Erreur suppression article menu :', error.message);
+      return;
+    }
+
+    setMenu((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  // ---- TOUT LE RESTE : encore en localStorage (migration progressive) ----
   const [ticket, setTicket] = useState<LigneTicket[]>(() => lire('kotara_ticket', []));
   const [commandes, setCommandes] = useState<Commande[]>(() => lire('kotara_historique', []));
   const [prochainNumero, setProchainNumero] = useState<number>(() =>
@@ -85,17 +217,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const [sortiesCaisse, setSortiesCaisse] = useState<SortieCaisse[]>(() =>
     lire('kotara_sorties_caisse', [])
   );
-
-  // Fusionne les valeurs stockées avec les valeurs par défaut,
-  // pour ne jamais perdre un champ ajouté après coup (comme codeAdmin).
   const [parametres, setParametres] = useState<Parametres>(() => {
     const stocke = lire<Partial<Parametres>>('kotara_parametres', {});
     return { ...PARAMETRES_PAR_DEFAUT, ...stocke };
   });
 
-  useEffect(() => {
-    window.localStorage.setItem('kotara_menu', JSON.stringify(menu));
-  }, [menu]);
   useEffect(() => {
     window.localStorage.setItem('kotara_ticket', JSON.stringify(ticket));
   }, [ticket]);
@@ -111,7 +237,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem('kotara_clotures', JSON.stringify(clotures));
   }, [clotures]);
-
   useEffect(() => {
     window.localStorage.setItem('kotara_employes', JSON.stringify(employes));
   }, [employes]);
@@ -121,21 +246,6 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem('kotara_sorties_caisse', JSON.stringify(sortiesCaisse));
   }, [sortiesCaisse]);
-
-  const ajouterArticleMenu: AppDataValue['ajouterArticleMenu'] = (nom, prix, categorie, photo) => {
-    setMenu((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), nom, prix, categorie, icone: '', photo, actif: true },
-    ]);
-  };
-
-  const modifierArticleMenu: AppDataValue['modifierArticleMenu'] = (id, changements) => {
-    setMenu((prev) => prev.map((a) => (a.id === id ? { ...a, ...changements } : a)));
-  };
-
-  const supprimerArticleMenu: AppDataValue['supprimerArticleMenu'] = (id) => {
-    setMenu((prev) => prev.filter((a) => a.id !== id));
-  };
 
   const ajouterArticleTicket: AppDataValue['ajouterArticleTicket'] = (article) => {
     setTicket((prev) => {
@@ -184,9 +294,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const marquerPayee: AppDataValue['marquerPayee'] = (id, modePaiement) => {
     setCommandes((prev) =>
       prev.map((c) =>
-        c.id === id
-          ? { ...c, modePaiement, dateEncaissement: new Date().toISOString() }
-          : c
+        c.id === id ? { ...c, modePaiement, dateEncaissement: new Date().toISOString() } : c
       )
     );
   };
@@ -215,10 +323,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   };
 
   const ajouterEmploye: AppDataValue['ajouterEmploye'] = (nom, code, role) => {
-    setEmployes((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), nom, code, role, actif: true },
-    ]);
+    setEmployes((prev) => [...prev, { id: crypto.randomUUID(), nom, code, role, actif: true }]);
   };
 
   const modifierEmploye: AppDataValue['modifierEmploye'] = (id, changements) => {
@@ -251,6 +356,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
 
   const valeur: AppDataValue = {
     menu,
+    menuCharge,
     ajouterArticleMenu,
     modifierArticleMenu,
     supprimerArticleMenu,
@@ -271,6 +377,11 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     verifierCodeAdmin,
     sortiesCaisse,
     ajouterSortieCaisse,
+    employes,
+    ajouterEmploye,
+    modifierEmploye,
+    supprimerEmploye,
+    trouverEmployeParCode,
   };
 
   return <AppDataContext.Provider value={valeur}>{children}</AppDataContext.Provider>;
@@ -283,9 +394,11 @@ function useAppData() {
 }
 
 export function useMenu() {
-  const { menu, ajouterArticleMenu, modifierArticleMenu, supprimerArticleMenu } = useAppData();
+  const { menu, menuCharge, ajouterArticleMenu, modifierArticleMenu, supprimerArticleMenu } =
+    useAppData();
   return {
     articles: menu,
+    chargement: !menuCharge,
     ajouterArticle: ajouterArticleMenu,
     modifierArticle: modifierArticleMenu,
     supprimerArticle: supprimerArticleMenu,

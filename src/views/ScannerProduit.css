@@ -1,0 +1,31 @@
+.scanner-header {
+  margin-bottom: 20px;
+}
+
+.scanner-header h2 {
+  font-size: 18px;
+  margin: 0 0 14px;
+}
+
+.scanner-barre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+  padding: 14px 16px;
+  max-width: 500px;
+}
+
+.scanner-icone {
+  font-size: 16px;
+}
+
+.scanner-barre input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  background: transparent;
+}

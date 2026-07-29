@@ -23,3 +23,60 @@ body {
   text-align: center;
   color: #999;
 }
+
+.app-verification-restaurant {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F8F9FA;
+}
+
+.app-verification-restaurant form {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+.app-verification-restaurant h2 {
+  font-size: 18px;
+  margin: 0 0 6px;
+}
+
+.app-verification-restaurant p {
+  font-size: 13px;
+  color: #999;
+  margin: 0 0 20px;
+}
+
+.app-verification-restaurant input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+}
+
+.app-verification-restaurant button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: #FF9500;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-verification-erreur {
+  color: #C0433F;
+  font-size: 12px;
+  margin: -8px 0 12px;
+}

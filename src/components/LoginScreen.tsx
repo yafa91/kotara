@@ -1,17 +1,100 @@
 import { useState } from 'react';
+import { supabase } from '../lib/supabaseClient';
 import './LoginScreen.css';
 
 interface LoginScreenProps {
-  onLogin: (identifiant: string, motDePasse: string) => void;
+  onConnecte: () => void;
 }
 
-export default function LoginScreen({ onLogin }: LoginScreenProps) {
-  const [identifiant, setIdentifiant] = useState('');
+export default function LoginScreen({ onConnecte }: LoginScreenProps) {
+  const [etape, setEtape] = useState<'saisie' | 'choixType' | 'nouveauCompte'>('saisie');
+  const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
+  const [typeEtablissement, setTypeEtablissement] = useState<'restaurant' | 'magasin' | null>(null);
+  const [nomEtablissement, setNomEtablissement] = useState('');
+  const [chargement, setChargement] = useState(false);
+  const [erreur, setErreur] = useState('');
+  const [messageInfo, setMessageInfo] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmitSaisie = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(identifiant, motDePasse);
+    setErreur('');
+    setMessageInfo('');
+
+    if (!email.trim() || !motDePasse.trim()) {
+      setErreur('Email et mot de passe requis.');
+      return;
+    }
+
+    setChargement(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: motDePasse,
+      });
+
+      if (!error) {
+        onConnecte();
+        return;
+      }
+
+      setEtape('choixType');
+    } finally {
+      setChargement(false);
+    }
+  };
+
+  const handleChoixType = (type: 'restaurant' | 'magasin') => {
+    setTypeEtablissement(type);
+    setEtape('nouveauCompte');
+  };
+
+  const handleSubmitNouveauCompte = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErreur('');
+    setMessageInfo('');
+
+    if (!nomEtablissement.trim()) {
+      setErreur(typeEtablissement === 'restaurant' ? 'Le nom du restaurant est requis.' : 'Le nom du magasin est requis.');
+      return;
+    }
+
+    setChargement(true);
+    try {
+      // On stocke le nom et le type d'établissement dans les métadonnées du compte.
+      // Ils seront utilisés pour créer la fiche dès la première
+      // connexion réussie (après confirmation de l'email si nécessaire).
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password: motDePasse,
+        options: {
+          data: { nom_restaurant: nomEtablissement.trim(), type_etablissement: typeEtablissement },
+        },
+      });
+
+      if (error) {
+        setErreur(
+          error.message.toLowerCase().includes('registered')
+            ? 'Ce compte existe déjà — mot de passe incorrect.'
+            : error.message
+        );
+        return;
+      }
+
+      if (data.session) {
+        // Confirmation email désactivée : on est déjà connecté
+        onConnecte();
+      } else {
+        setMessageInfo(
+          'Compte créé ! Vérifie ta boîte mail pour confirmer ton adresse, puis reconnecte-toi ici.'
+        );
+        setEtape('saisie');
+        setNomEtablissement('');
+        setTypeEtablissement(null);
+      }
+    } finally {
+      setChargement(false);
+    }
   };
 
   return (
@@ -20,21 +103,81 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
       <p className="login-titre">
         <span className="login-k">K</span>otara
       </p>
-      <form className="login-form" onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Identifiant"
-          value={identifiant}
-          onChange={(e) => setIdentifiant(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Mot de passe"
-          value={motDePasse}
-          onChange={(e) => setMotDePasse(e.target.value)}
-        />
-        <button type="submit">Se connecter</button>
-      </form>
+
+      {etape === 'saisie' && (
+        <form className="login-form" onSubmit={handleSubmitSaisie}>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            type="password"
+            placeholder="Mot de passe"
+            value={motDePasse}
+            onChange={(e) => setMotDePasse(e.target.value)}
+          />
+
+          {erreur && <p className="login-erreur">{erreur}</p>}
+          {messageInfo && <p className="login-info">{messageInfo}</p>}
+
+          <button type="submit" disabled={chargement}>
+            {chargement ? 'Chargement...' : 'Continuer'}
+          </button>
+        </form>
+      )}
+
+      {etape === 'choixType' && (
+        <div className="login-form">
+          <p className="login-info">
+            Aucun compte trouvé pour {email}. Qu'est-ce que tu gères ?
+          </p>
+          <button type="button" onClick={() => handleChoixType('restaurant')}>
+            Un restaurant
+          </button>
+          <button type="button" onClick={() => handleChoixType('magasin')}>
+            Un magasin
+          </button>
+          <button
+            type="button"
+            className="login-retour"
+            onClick={() => setEtape('saisie')}
+          >
+            ← Retour
+          </button>
+        </div>
+      )}
+
+      {etape === 'nouveauCompte' && (
+        <form className="login-form" onSubmit={handleSubmitNouveauCompte}>
+          <p className="login-info">
+            Complète ces infos pour créer ton compte
+          </p>
+          <input
+            type="text"
+            placeholder={typeEtablissement === 'restaurant' ? 'Nom du restaurant' : 'Nom du magasin'}
+            value={nomEtablissement}
+            onChange={(e) => setNomEtablissement(e.target.value)}
+          />
+
+          {erreur && <p className="login-erreur">{erreur}</p>}
+
+          <button type="submit" disabled={chargement}>
+            {chargement ? 'Création...' : 'Créer mon compte'}
+          </button>
+          <button
+            type="button"
+            className="login-retour"
+            onClick={() => {
+              setEtape('choixType');
+              setErreur('');
+            }}
+          >
+            ← Retour
+          </button>
+        </form>
+      )}
     </div>
   );
 }

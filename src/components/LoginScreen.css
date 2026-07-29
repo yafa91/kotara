@@ -60,3 +60,48 @@
 .login-aide:hover {
   color: #FF9500;
 }
+
+.login-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.login-toggle button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+}
+
+.login-toggle-actif {
+  background: #FF9500 !important;
+  border-color: #FF9500 !important;
+  color: #fff !important;
+  font-weight: 600;
+}
+
+.login-erreur {
+  color: #C0433F;
+  font-size: 12px;
+  margin: -8px 0 8px;
+}
+
+.login-info {
+  color: #3B6D11;
+  font-size: 12px;
+  margin: -8px 0 8px;
+}
+
+.login-retour {
+  background: none !important;
+  border: none !important;
+  color: #999 !important;
+  font-size: 13px;
+  margin-top: 12px;
+  cursor: pointer;
+}
