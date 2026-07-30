@@ -6,6 +6,7 @@ import Support from './views/Support';
 import Comptabilite from './views/Comptabilite';
 import type { VueActive } from './components/Sidebar';
 import PriseCommande from './views/PriseCommande';
+import ScannerProduit from './views/ScannerProduit';
 import MenuProduits from './views/MenuProduits';
 import Caisse from './views/Caisse';
 import Historique from './views/Historique';
@@ -22,14 +23,17 @@ import './App.css';
 const VUES_EMPLOYE: VueActive[] = ['commande', 'caisse', 'historique', 'support'];
 
 type TypeEtablissement = 'restaurant' | 'magasin';
+type Devise = 'EUR' | 'XOF';
 
 function AppAuthentifie({
   restaurantId,
   typeEtablissement,
+  devise,
   onDeconnexionCompte,
 }: {
   restaurantId: string;
   typeEtablissement: TypeEtablissement;
+  devise: Devise;
   onDeconnexionCompte: () => void;
 }) {
   const [vueActive, setVueActive] = useState<VueActive>('commande');
@@ -48,7 +52,7 @@ function AppAuthentifie({
         if (!serviceOuvertAujourdHui) {
           return <ServiceFerme onAllerCaisse={() => setVueActive('caisse')} />;
         }
-        return <PriseCommande />;
+        return typeEtablissement === 'magasin' ? <ScannerProduit /> : <PriseCommande />;
       case 'caisse':
         return <Caisse />;
       case 'historique':
@@ -96,6 +100,7 @@ export default function App() {
   const [authSession, setAuthSession] = useState<AuthSession | null>(null);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [typeEtablissement, setTypeEtablissement] = useState<TypeEtablissement>('restaurant');
+  const [devise, setDevise] = useState<Devise>('EUR');
   const [nomRestaurantManquant, setNomRestaurantManquant] = useState(false);
   const [nomRestaurantSaisi, setNomRestaurantSaisi] = useState('');
   const [erreurRestaurant, setErreurRestaurant] = useState('');
@@ -121,7 +126,7 @@ export default function App() {
     (async () => {
       const { data: restaurantsExistants, error } = await supabase
         .from('restaurants')
-        .select('id, type_etablissement')
+        .select('id, type_etablissement, devise')
         .eq('owner_id', authSession.user.id)
         .limit(1);
 
@@ -135,6 +140,7 @@ export default function App() {
         setTypeEtablissement(
           (restaurantsExistants[0].type_etablissement as TypeEtablissement) || 'restaurant'
         );
+        setDevise((restaurantsExistants[0].devise as Devise) || 'EUR');
         return;
       }
 
@@ -143,6 +149,9 @@ export default function App() {
         | undefined;
       const typeDepuisMetadata = authSession.user.user_metadata?.type_etablissement as
         | TypeEtablissement
+        | undefined;
+      const deviseDepuisMetadata = authSession.user.user_metadata?.devise as
+        | Devise
         | undefined;
 
       if (!nomDepuisMetadata) {
@@ -156,8 +165,9 @@ export default function App() {
           nom: nomDepuisMetadata,
           owner_id: authSession.user.id,
           type_etablissement: typeDepuisMetadata || 'restaurant',
+          devise: deviseDepuisMetadata || 'EUR',
         })
-        .select('id, type_etablissement')
+        .select('id, type_etablissement, devise')
         .single();
 
       if (erreurInsertion) {
@@ -169,6 +179,7 @@ export default function App() {
       setTypeEtablissement(
         (nouveauRestaurant.type_etablissement as TypeEtablissement) || 'restaurant'
       );
+      setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
     })();
   }, [authSession]);
 
@@ -179,6 +190,9 @@ export default function App() {
     const typeDepuisMetadata = authSession.user.user_metadata?.type_etablissement as
       | TypeEtablissement
       | undefined;
+    const deviseDepuisMetadata = authSession.user.user_metadata?.devise as
+      | Devise
+      | undefined;
 
     const { data: nouveauRestaurant, error } = await supabase
       .from('restaurants')
@@ -186,8 +200,9 @@ export default function App() {
         nom: nomRestaurantSaisi.trim(),
         owner_id: authSession.user.id,
         type_etablissement: typeDepuisMetadata || 'restaurant',
+        devise: deviseDepuisMetadata || 'EUR',
       })
-      .select('id, type_etablissement')
+      .select('id, type_etablissement, devise')
       .single();
 
     if (error) {
@@ -200,6 +215,7 @@ export default function App() {
     setTypeEtablissement(
       (nouveauRestaurant.type_etablissement as TypeEtablissement) || 'restaurant'
     );
+    setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
   };
 
   const handleDeconnexionCompte = async () => {
@@ -241,10 +257,11 @@ export default function App() {
   }
 
   return (
-    <AppDataProvider restaurantId={restaurantId}>
+    <AppDataProvider restaurantId={restaurantId} devise={devise}>
       <AppAuthentifie
         restaurantId={restaurantId}
         typeEtablissement={typeEtablissement}
+        devise={devise}
         onDeconnexionCompte={handleDeconnexionCompte}
       />
     </AppDataProvider>

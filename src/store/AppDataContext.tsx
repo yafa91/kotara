@@ -10,6 +10,8 @@ import type {
 } from '../types';
 import { supabase } from '../lib/supabaseClient';
 
+type Devise = 'EUR' | 'XOF';
+
 interface EtatService {
   ouvert: boolean;
   date: string;
@@ -61,6 +63,8 @@ function ligneMenuVersArticle(ligne: any): ArticleMenu {
 }
 
 interface AppDataValue {
+  devise: Devise;
+
   menu: ArticleMenu[];
   menuCharge: boolean;
   ajouterArticleMenu: (
@@ -112,9 +116,11 @@ const AppDataContext = createContext<AppDataValue | undefined>(undefined);
 export function AppDataProvider({
   children,
   restaurantId,
+  devise = 'EUR',
 }: {
   children: ReactNode;
   restaurantId: string;
+  devise?: Devise;
 }) {
   // ---- MENU (Supabase) ----
   const [menu, setMenu] = useState<ArticleMenu[]>([]);
@@ -355,6 +361,7 @@ export function AppDataProvider({
   };
 
   const valeur: AppDataValue = {
+    devise,
     menu,
     menuCharge,
     ajouterArticleMenu,
@@ -391,6 +398,11 @@ function useAppData() {
   const contexte = useContext(AppDataContext);
   if (!contexte) throw new Error('useAppData doit être utilisé dans <AppDataProvider>');
   return contexte;
+}
+
+export function useDevise() {
+  const { devise } = useAppData();
+  return devise;
 }
 
 export function useMenu() {

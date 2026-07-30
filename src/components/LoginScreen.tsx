@@ -12,6 +12,7 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
   const [motDePasse, setMotDePasse] = useState('');
   const [typeEtablissement, setTypeEtablissement] = useState<'restaurant' | 'magasin' | null>(null);
   const [nomEtablissement, setNomEtablissement] = useState('');
+  const [devise, setDevise] = useState<'EUR' | 'XOF'>('EUR');
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState('');
   const [messageInfo, setMessageInfo] = useState('');
@@ -61,14 +62,18 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
 
     setChargement(true);
     try {
-      // On stocke le nom et le type d'établissement dans les métadonnées du compte.
-      // Ils seront utilisés pour créer la fiche dès la première
+      // On stocke le nom, le type d'établissement et la devise dans les métadonnées
+      // du compte. Ils seront utilisés pour créer la fiche dès la première
       // connexion réussie (après confirmation de l'email si nécessaire).
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: motDePasse,
         options: {
-          data: { nom_restaurant: nomEtablissement.trim(), type_etablissement: typeEtablissement },
+          data: {
+            nom_restaurant: nomEtablissement.trim(),
+            type_etablissement: typeEtablissement,
+            devise,
+          },
         },
       });
 
@@ -160,6 +165,29 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
             value={nomEtablissement}
             onChange={(e) => setNomEtablissement(e.target.value)}
           />
+
+          <div className="login-devise-choix">
+            <label>
+              <input
+                type="radio"
+                name="devise"
+                value="EUR"
+                checked={devise === 'EUR'}
+                onChange={() => setDevise('EUR')}
+              />
+              Euro (€)
+            </label>
+            <label>
+              <input
+                type="radio"
+                name="devise"
+                value="XOF"
+                checked={devise === 'XOF'}
+                onChange={() => setDevise('XOF')}
+              />
+              Franc CFA (FCFA)
+            </label>
+          </div>
 
           {erreur && <p className="login-erreur">{erreur}</p>}
 
