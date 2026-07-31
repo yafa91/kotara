@@ -1,25 +1,78 @@
-import { useState } from 'react';
-import { useMenu } from '../store/AppDataContext';
+import { useState, useEffect, useRef } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
+import { ScanLine } from 'lucide-react';
+import { useMenu, useCategories, useDevise } from '../store/AppDataContext';
 import type { Categorie } from '../types';
+import { formatMontant } from '../lib/formatMontant';
 import './MenuProduits.css';
-
-const CATEGORIES: Categorie[] = ['Plats', 'Boissons', 'Desserts', 'Frites', 'Sandwichs', 'Salades', 'Sauces', 'Menus', 'Pates', 'Autres'];
+import './ScannerProduit.css';
 
 export default function MenuProduits() {
   const { articles, ajouterArticle, modifierArticle, supprimerArticle } = useMenu();
+  const { categories } = useCategories();
   const [nom, setNom] = useState('');
   const [prix, setPrix] = useState('');
-  const [categorie, setCategorie] = useState<Categorie>('Plats');
+  const [categorie, setCategorie] = useState<Categorie>(categories[0] || 'Autres');
   const [photo, setPhoto] = useState<string | undefined>(undefined);
+  const [codeBarre, setCodeBarre] = useState<string | undefined>(undefined);
   const [erreur, setErreur] = useState('');
 
   const [idEnEdition, setIdEnEdition] = useState<string | null>(null);
   const [editNom, setEditNom] = useState('');
   const [editPrix, setEditPrix] = useState('');
-  const [editCategorie, setEditCategorie] = useState<Categorie>('Plats');
+  const [editCategorie, setEditCategorie] = useState<Categorie>(categories[0] || 'Autres');
   const [editCommentaire, setEditCommentaire] = useState('');
 
-  const formatPrix = (n: number) => `${n.toLocaleString('fr-FR')} FCFA`;
+  const devise = useDevise();
+  const formatPrix = (n: number) => formatMontant(n, devise);
+
+  // --- Scanner caméra (pour préremplir le code-barres à l'ajout) ---
+  const [scannerOuvert, setScannerOuvert] = useState(false);
+  const [erreurScan, setErreurScan] = useState<string | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  useEffect(() => {
+    if (!scannerOuvert) return;
+
+    const scanner = new Html5Qrcode('zone-scan-camera-menu');
+    scannerRef.current = scanner;
+    setErreurScan(null);
+
+    scanner
+      .start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (codeDetecte) => {
+          const articleExistant = articles.find((a) => a.codeBarre === codeDetecte);
+          if (articleExistant) {
+            // Produit déjà connu : on ouvre directement sa fiche pour modification
+            commencerEdition(articleExistant);
+            setScannerOuvert(false);
+            return;
+          }
+          // Nouveau produit : on préremplit juste le code-barres,
+          // il ne reste plus qu'à taper le nom et le prix.
+          setCodeBarre(codeDetecte);
+          setScannerOuvert(false);
+        },
+        () => {
+          // erreurs de lecture image par image : on ignore, c'est normal
+        }
+      )
+      .catch(() => {
+        setErreurScan("Impossible d'accéder à la caméra.");
+      });
+
+    return () => {
+      scanner
+        .stop()
+        .catch(() => {})
+        .finally(() => {
+          scanner.clear();
+        });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scannerOuvert]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fichier = e.target.files?.[0];
@@ -41,10 +94,11 @@ export default function MenuProduits() {
       setErreur('Le prix doit être un nombre valide (0 ou plus).');
       return;
     }
-    ajouterArticle(nom.trim(), prixNombre, categorie, photo);
+    ajouterArticle(nom.trim(), prixNombre, categorie, photo, codeBarre);
     setNom('');
     setPrix('');
     setPhoto(undefined);
+    setCodeBarre(undefined);
   };
 
   const handleSupprimer = (id: string, nomArticle: string) => {
@@ -101,6 +155,14 @@ export default function MenuProduits() {
           )}
           <input type="file" accept="image/*" onChange={handlePhotoChange} hidden />
         </label>
+        <button
+          type="button"
+          className="bouton-scan-camera"
+          onClick={() => setScannerOuvert(true)}
+          title="Scanner un code-barres pour préremplir la fiche"
+        >
+          <ScanLine size={20} />
+        </button>
         <input
           type="text"
           placeholder="Nom du plat"
@@ -109,12 +171,12 @@ export default function MenuProduits() {
         />
         <input
           type="number"
-          placeholder="Prix (FCFA)"
+          placeholder={`Prix (${devise === 'XOF' ? 'FCFA' : '€'})`}
           value={prix}
           onChange={(e) => setPrix(e.target.value)}
         />
         <select value={categorie} onChange={(e) => setCategorie(e.target.value as Categorie)}>
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <option key={cat} value={cat}>
               {cat}
             </option>
@@ -124,7 +186,35 @@ export default function MenuProduits() {
           Ajouter
         </button>
       </form>
+      {codeBarre && (
+        <p className="menu-produits-codebarre-info">
+          Code-barres scanné : <strong>{codeBarre}</strong>
+          <button
+            type="button"
+            className="menu-produits-codebarre-effacer"
+            onClick={() => setCodeBarre(undefined)}
+          >
+            ✕
+          </button>
+        </p>
+      )}
       {erreur && <p className="message-erreur">{erreur}</p>}
+
+      {scannerOuvert && (
+        <div className="scanner-overlay">
+          <div className="scanner-panel">
+            <div className="scanner-panel-header">
+              <h3>Scanner un produit</h3>
+              <button className="ticket-fermer" onClick={() => setScannerOuvert(false)}>
+                ✕
+              </button>
+            </div>
+            <div id="zone-scan-camera-menu" className="zone-scan-camera" />
+            {erreurScan && <p className="scanner-erreur">{erreurScan}</p>}
+          </div>
+        </div>
+      )}
+
       <div className="liste-articles">
         {articles.length === 0 ? (
           <p className="liste-vide">Aucun article dans le menu</p>
@@ -143,13 +233,13 @@ export default function MenuProduits() {
                     type="number"
                     value={editPrix}
                     onChange={(e) => setEditPrix(e.target.value)}
-                    placeholder="Prix (FCFA)"
+                    placeholder={`Prix (${devise === 'XOF' ? 'FCFA' : '€'})`}
                   />
                   <select
                     value={editCategorie}
                     onChange={(e) => setEditCategorie(e.target.value as Categorie)}
                   >
-                    {CATEGORIES.map((cat) => (
+                    {categories.map((cat) => (
                       <option key={cat} value={cat}>
                         {cat}
                       </option>

@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type {
   ArticleMenu,
+  Categorie,
   Cloture,
   Commande,
   Employe,
@@ -11,11 +12,7 @@ import type {
 import { supabase } from '../lib/supabaseClient';
 
 type Devise = 'EUR' | 'XOF';
-
-interface EtatService {
-  ouvert: boolean;
-  date: string;
-}
+type TypeEtablissement = 'restaurant' | 'magasin';
 
 interface Parametres {
   nomResto: string;
@@ -25,31 +22,30 @@ interface Parametres {
   logoUrl?: string;
   identifiantCompte: string;
   motDePasseCompte: string;
+  categories: Categorie[];
 }
 
-const PARAMETRES_PAR_DEFAUT: Parametres = {
-  nomResto: 'Chez Mama Kotara',
-  adresseResto: "Avenue de l'Indépendance, Bangui",
-  telephoneResto: '+236 70 00 00 00',
-  codeAdmin: '1234',
-  identifiantCompte: 'admin',
-  motDePasseCompte: 'admin',
-};
+const CATEGORIES_PAR_DEFAUT_RESTAURANT: Categorie[] = [
+  'Plats',
+  'Boissons',
+  'Desserts',
+  'Frites',
+  'Sandwichs',
+  'Salades',
+  'Sauces',
+  'Menus',
+  'Pates',
+  'Autres',
+];
+
+const CATEGORIES_PAR_DEFAUT_MAGASIN: Categorie[] = [];
 
 function dateDuJour() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function lire<T>(cle: string, valeurParDefaut: T): T {
-  try {
-    const stocke = window.localStorage.getItem(cle);
-    return stocke ? (JSON.parse(stocke) as T) : valeurParDefaut;
-  } catch {
-    return valeurParDefaut;
-  }
-}
+// ---- Conversions ligne Supabase -> type app ----
 
-// Convertit une ligne de la table Supabase "menu" en ArticleMenu utilisé par l'app
 function ligneMenuVersArticle(ligne: any): ArticleMenu {
   return {
     id: ligne.id,
@@ -59,6 +55,54 @@ function ligneMenuVersArticle(ligne: any): ArticleMenu {
     icone: '',
     photo: ligne.photo_url || undefined,
     actif: ligne.actif,
+    codeBarre: ligne.code_barre || undefined,
+    stock: ligne.stock ?? 0,
+    seuilAlerte: ligne.seuil_alerte ?? 5,
+  };
+}
+
+function ligneCommandeVersCommande(ligne: any): Commande {
+  return {
+    id: ligne.id,
+    numero: ligne.numero,
+    lignes: ligne.lignes as LigneTicket[],
+    modePaiement: ligne.mode_paiement,
+    dateCreation: ligne.date_creation,
+    dateEncaissement: ligne.date_encaissement || undefined,
+    total: Number(ligne.total),
+  };
+}
+
+function ligneClotureVersCloture(ligne: any): Cloture {
+  return {
+    id: ligne.id,
+    date: ligne.date,
+    totalEspecesTheorique: Number(ligne.total_especes_theorique),
+    montantEspecesReel: Number(ligne.montant_especes_reel),
+    ecart: Number(ligne.ecart),
+    totalMobileMoney: Number(ligne.total_mobile_money),
+    totalGeneral: Number(ligne.total_general),
+    dateCloture: ligne.date_cloture,
+  };
+}
+
+function ligneEmployeVersEmploye(ligne: any): Employe {
+  return {
+    id: ligne.id,
+    nom: ligne.nom,
+    code: ligne.code,
+    role: ligne.role,
+    actif: ligne.actif,
+  };
+}
+
+function ligneSortieVersSortie(ligne: any): SortieCaisse {
+  return {
+    id: ligne.id,
+    motif: ligne.motif,
+    montant: Number(ligne.montant),
+    date: ligne.date,
+    dateCreation: ligne.date_creation,
   };
 }
 
@@ -70,8 +114,9 @@ interface AppDataValue {
   ajouterArticleMenu: (
     nom: string,
     prix: number,
-    categorie: ArticleMenu['categorie'],
-    photo?: string
+    categorie: Categorie,
+    photo?: string,
+    codeBarre?: string
   ) => Promise<void>;
   modifierArticleMenu: (id: string, changements: Partial<ArticleMenu>) => Promise<void>;
   supprimerArticleMenu: (id: string) => Promise<void>;
@@ -83,31 +128,35 @@ interface AppDataValue {
 
   commandes: Commande[];
   prochainNumero: number;
-  encaisser: (lignes: LigneTicket[], total: number, mode: ModePaiement) => number;
-  marquerPayee: (id: string, mode: 'espece' | 'mobile_money') => void;
+  encaisser: (lignes: LigneTicket[], total: number, mode: ModePaiement) => Promise<number>;
+  marquerPayee: (id: string, mode: 'espece' | 'mobile_money') => Promise<void>;
 
   serviceOuvertAujourdHui: boolean;
-  demarrerService: () => void;
+  demarrerService: () => Promise<void>;
   cloturerServiceAvecComptage: (params: {
     montantEspecesReel: number;
     totalEspecesTheorique: number;
     totalMobileMoney: number;
     totalGeneral: number;
-  }) => void;
+  }) => Promise<void>;
 
   clotures: Cloture[];
 
   parametres: Parametres;
-  modifierParametres: (changements: Partial<Parametres>) => void;
+  modifierParametres: (changements: Partial<Parametres>) => Promise<void>;
   verifierCodeAdmin: (code: string) => boolean;
 
+  categories: Categorie[];
+  ajouterCategorie: (nom: string) => Promise<void>;
+  supprimerCategorie: (nom: string) => Promise<void>;
+
   sortiesCaisse: SortieCaisse[];
-  ajouterSortieCaisse: (motif: string, montant: number) => void;
+  ajouterSortieCaisse: (motif: string, montant: number) => Promise<void>;
 
   employes: Employe[];
-  ajouterEmploye: (nom: string, code: string, role: Employe['role']) => void;
-  modifierEmploye: (id: string, changements: Partial<Employe>) => void;
-  supprimerEmploye: (id: string) => void;
+  ajouterEmploye: (nom: string, code: string, role: Employe['role']) => Promise<void>;
+  modifierEmploye: (id: string, changements: Partial<Employe>) => Promise<void>;
+  supprimerEmploye: (id: string) => Promise<void>;
   trouverEmployeParCode: (code: string) => Employe | null;
 }
 
@@ -117,12 +166,14 @@ export function AppDataProvider({
   children,
   restaurantId,
   devise = 'EUR',
+  typeEtablissement = 'restaurant',
 }: {
   children: ReactNode;
   restaurantId: string;
   devise?: Devise;
+  typeEtablissement?: TypeEtablissement;
 }) {
-  // ---- MENU (Supabase) ----
+  // ---- MENU ----
   const [menu, setMenu] = useState<ArticleMenu[]>([]);
   const [menuCharge, setMenuCharge] = useState(false);
 
@@ -157,7 +208,8 @@ export function AppDataProvider({
     nom,
     prix,
     categorie,
-    photo
+    photo,
+    codeBarre
   ) => {
     const { data, error } = await supabase
       .from('menu')
@@ -167,6 +219,7 @@ export function AppDataProvider({
         prix,
         categorie,
         photo_url: photo || null,
+        code_barre: codeBarre || null,
         actif: true,
       })
       .select('*')
@@ -187,6 +240,9 @@ export function AppDataProvider({
     if (changements.categorie !== undefined) payload.categorie = changements.categorie;
     if (changements.photo !== undefined) payload.photo_url = changements.photo || null;
     if (changements.actif !== undefined) payload.actif = changements.actif;
+    if (changements.codeBarre !== undefined) payload.code_barre = changements.codeBarre || null;
+    if (changements.stock !== undefined) payload.stock = changements.stock;
+    if (changements.seuilAlerte !== undefined) payload.seuil_alerte = changements.seuilAlerte;
 
     const { error } = await supabase.from('menu').update(payload).eq('id', id);
 
@@ -209,49 +265,19 @@ export function AppDataProvider({
     setMenu((prev) => prev.filter((a) => a.id !== id));
   };
 
-  // ---- TOUT LE RESTE : encore en localStorage (migration progressive) ----
-  const [ticket, setTicket] = useState<LigneTicket[]>(() => lire('kotara_ticket', []));
-  const [commandes, setCommandes] = useState<Commande[]>(() => lire('kotara_historique', []));
-  const [prochainNumero, setProchainNumero] = useState<number>(() =>
-    lire('kotara_prochain_numero', 1)
-  );
-  const [service, setService] = useState<EtatService>(() =>
-    lire('kotara_service', { ouvert: false, date: '' })
-  );
-  const [clotures, setClotures] = useState<Cloture[]>(() => lire('kotara_clotures', []));
-  const [employes, setEmployes] = useState<Employe[]>(() => lire('kotara_employes', []));
-  const [sortiesCaisse, setSortiesCaisse] = useState<SortieCaisse[]>(() =>
-    lire('kotara_sorties_caisse', [])
-  );
-  const [parametres, setParametres] = useState<Parametres>(() => {
-    const stocke = lire<Partial<Parametres>>('kotara_parametres', {});
-    return { ...PARAMETRES_PAR_DEFAUT, ...stocke };
+  // ---- TICKET EN COURS : reste en local (panier transitoire de cette session) ----
+  const [ticket, setTicket] = useState<LigneTicket[]>(() => {
+    try {
+      const stocke = window.localStorage.getItem('kotara_ticket');
+      return stocke ? (JSON.parse(stocke) as LigneTicket[]) : [];
+    } catch {
+      return [];
+    }
   });
 
   useEffect(() => {
     window.localStorage.setItem('kotara_ticket', JSON.stringify(ticket));
   }, [ticket]);
-  useEffect(() => {
-    window.localStorage.setItem('kotara_historique', JSON.stringify(commandes));
-  }, [commandes]);
-  useEffect(() => {
-    window.localStorage.setItem('kotara_prochain_numero', JSON.stringify(prochainNumero));
-  }, [prochainNumero]);
-  useEffect(() => {
-    window.localStorage.setItem('kotara_service', JSON.stringify(service));
-  }, [service]);
-  useEffect(() => {
-    window.localStorage.setItem('kotara_clotures', JSON.stringify(clotures));
-  }, [clotures]);
-  useEffect(() => {
-    window.localStorage.setItem('kotara_employes', JSON.stringify(employes));
-  }, [employes]);
-  useEffect(() => {
-    window.localStorage.setItem('kotara_parametres', JSON.stringify(parametres));
-  }, [parametres]);
-  useEffect(() => {
-    window.localStorage.setItem('kotara_sorties_caisse', JSON.stringify(sortiesCaisse));
-  }, [sortiesCaisse]);
 
   const ajouterArticleTicket: AppDataValue['ajouterArticleTicket'] = (article) => {
     setTicket((prev) => {
@@ -278,9 +304,212 @@ export function AppDataProvider({
 
   const viderTicket = () => setTicket([]);
 
-  const encaisser: AppDataValue['encaisser'] = (lignes, total, modePaiement) => {
+  // ---- PARAMÈTRES + CATÉGORIES (colonnes sur "restaurants") ----
+  const [parametres, setParametres] = useState<Parametres>({
+    nomResto: '',
+    adresseResto: '',
+    telephoneResto: '',
+    codeAdmin: '1234',
+    identifiantCompte: 'admin',
+    motDePasseCompte: 'admin',
+    categories:
+      typeEtablissement === 'magasin'
+        ? CATEGORIES_PAR_DEFAUT_MAGASIN
+        : CATEGORIES_PAR_DEFAUT_RESTAURANT,
+  });
+  const [prochainNumero, setProchainNumero] = useState<number>(1);
+  const [serviceOuvertAujourdHui, setServiceOuvertAujourdHui] = useState(false);
+
+  // ---- COMMANDES / CLOTURES / EMPLOYES / SORTIES (tables Supabase) ----
+  const [commandes, setCommandes] = useState<Commande[]>([]);
+  const [clotures, setClotures] = useState<Cloture[]>([]);
+  const [employes, setEmployes] = useState<Employe[]>([]);
+  const [sortiesCaisse, setSortiesCaisse] = useState<SortieCaisse[]>([]);
+
+  useEffect(() => {
+    let annule = false;
+
+    (async () => {
+      const [
+        { data: restau, error: erreurRestau },
+        { data: cmds, error: erreurCmds },
+        { data: clos, error: erreurClos },
+        { data: emps, error: erreurEmps },
+        { data: sorts, error: erreurSorts },
+      ] = await Promise.all([
+        supabase
+          .from('restaurants')
+          .select(
+            'nom, adresse, telephone, code_admin, identifiant_compte, mot_de_passe_compte, categories, prochain_numero, service_ouvert, service_date'
+          )
+          .eq('id', restaurantId)
+          .single(),
+        supabase
+          .from('commandes')
+          .select('*')
+          .eq('restaurant_id', restaurantId)
+          .order('date_creation', { ascending: false }),
+        supabase
+          .from('clotures')
+          .select('*')
+          .eq('restaurant_id', restaurantId)
+          .order('date_cloture', { ascending: false }),
+        supabase.from('employes').select('*').eq('restaurant_id', restaurantId),
+        supabase
+          .from('sorties_caisse')
+          .select('*')
+          .eq('restaurant_id', restaurantId)
+          .order('date_creation', { ascending: false }),
+      ]);
+
+      if (annule) return;
+
+      if (erreurRestau) {
+        console.error('Erreur chargement paramètres :', erreurRestau.message);
+      } else if (restau) {
+        const categoriesParDefaut =
+          typeEtablissement === 'magasin'
+            ? CATEGORIES_PAR_DEFAUT_MAGASIN
+            : CATEGORIES_PAR_DEFAUT_RESTAURANT;
+
+        setParametres({
+          nomResto: restau.nom || '',
+          adresseResto: restau.adresse || '',
+          telephoneResto: restau.telephone || '',
+          codeAdmin: restau.code_admin || '1234',
+          identifiantCompte: restau.identifiant_compte || 'admin',
+          motDePasseCompte: restau.mot_de_passe_compte || 'admin',
+          categories:
+            restau.categories && restau.categories.length > 0
+              ? restau.categories
+              : categoriesParDefaut,
+        });
+        setProchainNumero(restau.prochain_numero || 1);
+        setServiceOuvertAujourdHui(
+          Boolean(restau.service_ouvert) && restau.service_date === dateDuJour()
+        );
+      }
+
+      if (erreurCmds) {
+        console.error('Erreur chargement commandes :', erreurCmds.message);
+      } else {
+        setCommandes((cmds || []).map(ligneCommandeVersCommande));
+      }
+
+      if (erreurClos) {
+        console.error('Erreur chargement clôtures :', erreurClos.message);
+      } else {
+        setClotures((clos || []).map(ligneClotureVersCloture));
+      }
+
+      if (erreurEmps) {
+        console.error('Erreur chargement employés :', erreurEmps.message);
+      } else {
+        setEmployes((emps || []).map(ligneEmployeVersEmploye));
+      }
+
+      if (erreurSorts) {
+        console.error('Erreur chargement sorties de caisse :', erreurSorts.message);
+      } else {
+        setSortiesCaisse((sorts || []).map(ligneSortieVersSortie));
+      }
+    })();
+
+    return () => {
+      annule = true;
+    };
+  }, [restaurantId, typeEtablissement]);
+
+  const modifierParametres: AppDataValue['modifierParametres'] = async (changements) => {
+    const payload: Record<string, unknown> = {};
+    if (changements.nomResto !== undefined) payload.nom = changements.nomResto;
+    if (changements.adresseResto !== undefined) payload.adresse = changements.adresseResto;
+    if (changements.telephoneResto !== undefined) payload.telephone = changements.telephoneResto;
+    if (changements.codeAdmin !== undefined) payload.code_admin = changements.codeAdmin;
+    if (changements.identifiantCompte !== undefined)
+      payload.identifiant_compte = changements.identifiantCompte;
+    if (changements.motDePasseCompte !== undefined)
+      payload.mot_de_passe_compte = changements.motDePasseCompte;
+    if (changements.categories !== undefined) payload.categories = changements.categories;
+
+    const { error } = await supabase.from('restaurants').update(payload).eq('id', restaurantId);
+
+    if (error) {
+      console.error('Erreur mise à jour paramètres :', error.message);
+      return;
+    }
+
+    setParametres((prev) => ({ ...prev, ...changements }));
+  };
+
+  const verifierCodeAdmin = (code: string) => code === parametres.codeAdmin;
+
+  const ajouterCategorie: AppDataValue['ajouterCategorie'] = async (nom) => {
+    const nomPropre = nom.trim();
+    if (!nomPropre) return;
+    if (parametres.categories.some((c) => c.toLowerCase() === nomPropre.toLowerCase())) return;
+    await modifierParametres({ categories: [...parametres.categories, nomPropre] });
+  };
+
+  const supprimerCategorie: AppDataValue['supprimerCategorie'] = async (nom) => {
+    await modifierParametres({
+      categories: parametres.categories.filter((c) => c !== nom),
+    });
+  };
+
+  // ---- COMMANDES ----
+  const decrementerStockPourVente = async (lignes: LigneTicket[]) => {
+    for (const ligne of lignes) {
+      const article = menu.find((a) => a.id === ligne.articleId);
+      if (!article) continue;
+      const nouveauStock = Math.max(0, article.stock - ligne.quantite);
+      const { error } = await supabase
+        .from('menu')
+        .update({ stock: nouveauStock })
+        .eq('id', ligne.articleId);
+      if (error) {
+        console.error('Erreur mise à jour du stock :', error.message);
+      }
+    }
+    setMenu((prev) =>
+      prev.map((a) => {
+        const ligne = lignes.find((l) => l.articleId === a.id);
+        if (!ligne) return a;
+        return { ...a, stock: Math.max(0, a.stock - ligne.quantite) };
+      })
+    );
+  };
+
+  const encaisser: AppDataValue['encaisser'] = async (lignes, total, modePaiement) => {
     const numero = prochainNumero;
     const maintenant = new Date().toISOString();
+
+    const { error: erreurInsertion } = await supabase.from('commandes').insert({
+      restaurant_id: restaurantId,
+      numero,
+      lignes,
+      mode_paiement: modePaiement,
+      date_creation: maintenant,
+      date_encaissement: modePaiement === 'en_attente' ? null : maintenant,
+      total,
+    });
+
+    if (erreurInsertion) {
+      console.error('Erreur enregistrement commande :', erreurInsertion.message);
+      return numero;
+    }
+
+    const { error: erreurCompteur } = await supabase
+      .from('restaurants')
+      .update({ prochain_numero: numero + 1 })
+      .eq('id', restaurantId);
+
+    if (erreurCompteur) {
+      console.error('Erreur mise à jour du compteur de ticket :', erreurCompteur.message);
+    }
+
+    await decrementerStockPourVente(lignes);
+
     setCommandes((prev) => [
       {
         id: crypto.randomUUID(),
@@ -297,67 +526,144 @@ export function AppDataProvider({
     return numero;
   };
 
-  const marquerPayee: AppDataValue['marquerPayee'] = (id, modePaiement) => {
+  const marquerPayee: AppDataValue['marquerPayee'] = async (id, modePaiement) => {
+    const maintenant = new Date().toISOString();
+    const { error } = await supabase
+      .from('commandes')
+      .update({ mode_paiement: modePaiement, date_encaissement: maintenant })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Erreur mise à jour paiement :', error.message);
+      return;
+    }
+
     setCommandes((prev) =>
       prev.map((c) =>
-        c.id === id ? { ...c, modePaiement, dateEncaissement: new Date().toISOString() } : c
+        c.id === id ? { ...c, modePaiement, dateEncaissement: maintenant } : c
       )
     );
   };
 
-  const serviceOuvertAujourdHui = service.ouvert && service.date === dateDuJour();
-  const demarrerService = () => setService({ ouvert: true, date: dateDuJour() });
+  // ---- SERVICE (ouverture/fermeture de journée) ----
+  const demarrerService: AppDataValue['demarrerService'] = async () => {
+    const aujourdhui = dateDuJour();
+    const { error } = await supabase
+      .from('restaurants')
+      .update({ service_ouvert: true, service_date: aujourdhui })
+      .eq('id', restaurantId);
 
-  const cloturerServiceAvecComptage: AppDataValue['cloturerServiceAvecComptage'] = ({
+    if (error) {
+      console.error('Erreur démarrage service :', error.message);
+      return;
+    }
+    setServiceOuvertAujourdHui(true);
+  };
+
+  const cloturerServiceAvecComptage: AppDataValue['cloturerServiceAvecComptage'] = async ({
     montantEspecesReel,
     totalEspecesTheorique,
     totalMobileMoney,
     totalGeneral,
   }) => {
-    const nouvelleCloture: Cloture = {
-      id: crypto.randomUUID(),
+    const nouvelleCloture = {
+      restaurant_id: restaurantId,
       date: dateDuJour(),
-      totalEspecesTheorique,
-      montantEspecesReel,
+      total_especes_theorique: totalEspecesTheorique,
+      montant_especes_reel: montantEspecesReel,
       ecart: montantEspecesReel - totalEspecesTheorique,
-      totalMobileMoney,
-      totalGeneral,
-      dateCloture: new Date().toISOString(),
+      total_mobile_money: totalMobileMoney,
+      total_general: totalGeneral,
+      date_cloture: new Date().toISOString(),
     };
-    setClotures((prev) => [nouvelleCloture, ...prev]);
-    setService((prev) => ({ ...prev, ouvert: false }));
+
+    const { data, error } = await supabase
+      .from('clotures')
+      .insert(nouvelleCloture)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Erreur clôture service :', error.message);
+      return;
+    }
+
+    const { error: erreurService } = await supabase
+      .from('restaurants')
+      .update({ service_ouvert: false })
+      .eq('id', restaurantId);
+
+    if (erreurService) {
+      console.error('Erreur mise à jour statut service :', erreurService.message);
+    }
+
+    setClotures((prev) => [ligneClotureVersCloture(data), ...prev]);
+    setServiceOuvertAujourdHui(false);
   };
 
-  const ajouterEmploye: AppDataValue['ajouterEmploye'] = (nom, code, role) => {
-    setEmployes((prev) => [...prev, { id: crypto.randomUUID(), nom, code, role, actif: true }]);
+  // ---- EMPLOYÉS ----
+  const ajouterEmploye: AppDataValue['ajouterEmploye'] = async (nom, code, role) => {
+    const { data, error } = await supabase
+      .from('employes')
+      .insert({ restaurant_id: restaurantId, nom, code, role, actif: true })
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Erreur ajout employé :', error.message);
+      return;
+    }
+
+    setEmployes((prev) => [...prev, ligneEmployeVersEmploye(data)]);
   };
 
-  const modifierEmploye: AppDataValue['modifierEmploye'] = (id, changements) => {
+  const modifierEmploye: AppDataValue['modifierEmploye'] = async (id, changements) => {
+    const { error } = await supabase.from('employes').update(changements).eq('id', id);
+
+    if (error) {
+      console.error('Erreur modification employé :', error.message);
+      return;
+    }
+
     setEmployes((prev) => prev.map((e) => (e.id === id ? { ...e, ...changements } : e)));
   };
 
-  const supprimerEmploye: AppDataValue['supprimerEmploye'] = (id) => {
+  const supprimerEmploye: AppDataValue['supprimerEmploye'] = async (id) => {
+    const { error } = await supabase.from('employes').delete().eq('id', id);
+
+    if (error) {
+      console.error('Erreur suppression employé :', error.message);
+      return;
+    }
+
     setEmployes((prev) => prev.filter((e) => e.id !== id));
   };
 
   const trouverEmployeParCode = (code: string) =>
     employes.find((e) => e.code === code && e.actif) || null;
 
-  const modifierParametres: AppDataValue['modifierParametres'] = (changements) => {
-    setParametres((prev) => ({ ...prev, ...changements }));
-  };
-
-  const verifierCodeAdmin = (code: string) => code === parametres.codeAdmin;
-
-  const ajouterSortieCaisse: AppDataValue['ajouterSortieCaisse'] = (motif, montant) => {
-    const nouvelleSortie: SortieCaisse = {
-      id: crypto.randomUUID(),
+  // ---- SORTIES DE CAISSE ----
+  const ajouterSortieCaisse: AppDataValue['ajouterSortieCaisse'] = async (motif, montant) => {
+    const nouvelleSortie = {
+      restaurant_id: restaurantId,
       motif,
       montant,
       date: dateDuJour(),
-      dateCreation: new Date().toISOString(),
+      date_creation: new Date().toISOString(),
     };
-    setSortiesCaisse((prev) => [nouvelleSortie, ...prev]);
+
+    const { data, error } = await supabase
+      .from('sorties_caisse')
+      .insert(nouvelleSortie)
+      .select('*')
+      .single();
+
+    if (error) {
+      console.error('Erreur ajout sortie de caisse :', error.message);
+      return;
+    }
+
+    setSortiesCaisse((prev) => [ligneSortieVersSortie(data), ...prev]);
   };
 
   const valeur: AppDataValue = {
@@ -382,6 +688,9 @@ export function AppDataProvider({
     parametres,
     modifierParametres,
     verifierCodeAdmin,
+    categories: parametres.categories,
+    ajouterCategorie,
+    supprimerCategorie,
     sortiesCaisse,
     ajouterSortieCaisse,
     employes,
@@ -403,6 +712,11 @@ function useAppData() {
 export function useDevise() {
   const { devise } = useAppData();
   return devise;
+}
+
+export function useCategories() {
+  const { categories, ajouterCategorie, supprimerCategorie } = useAppData();
+  return { categories, ajouterCategorie, supprimerCategorie };
 }
 
 export function useMenu() {

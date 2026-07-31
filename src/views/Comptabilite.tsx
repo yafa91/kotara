@@ -4,6 +4,8 @@ import { useHistorique, useMenu } from '../store/AppDataContext';
 import DonutChart, { type SegmentDonut } from '../components/DonutChart';
 import type { Categorie } from '../types';
 import './Comptabilite.css';
+import { useDevise } from '../store/AppDataContext';
+import { formatMontant } from '../lib/formatMontant';
 
 interface ComptabiliteProps {
   planActuel: 'standard' | 'premium';
@@ -54,7 +56,8 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
   const [nouveauNom, setNouveauNom] = useState('');
   const [nouveauMontant, setNouveauMontant] = useState('');
 
-  const formatFCFA = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
+  const devise = useDevise();
+  const formatFCFA = (n: number) => formatMontant(n, devise);
 
   // Catégorie de chaque article, pour retrouver la catégorie d'une ligne de ticket
   const categorieParArticleId = useMemo(() => {

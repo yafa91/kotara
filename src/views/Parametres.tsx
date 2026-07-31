@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import AbonnementDetail from './AbonnementDetail';
-import { useParametres } from '../store/AppDataContext';
+import { useParametres, useCategories } from '../store/AppDataContext';
 import './Parametres.css';
 
 interface ParametresProps {
@@ -11,6 +11,7 @@ interface ParametresProps {
 export default function Parametres({ planActuel, onChangerPlan }: ParametresProps) {
   const [vue, setVue] = useState<'liste' | 'abonnement'>('liste');
   const { parametres, modifierParametres, verifierCodeAdmin } = useParametres();
+  const { categories, ajouterCategorie, supprimerCategorie } = useCategories();
 
   // Infos du restaurant
   const [nomResto, setNomResto] = useState(parametres.nomResto);
@@ -28,6 +29,10 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
   const [identifiantCompte, setIdentifiantCompte] = useState(parametres.identifiantCompte);
   const [motDePasseCompte, setMotDePasseCompte] = useState(parametres.motDePasseCompte);
   const [messageCompte, setMessageCompte] = useState('');
+
+  // Catégories
+  const [nouvelleCategorie, setNouvelleCategorie] = useState('');
+  const [messageCategorie, setMessageCategorie] = useState('');
 
   if (vue === 'abonnement') {
     return (
@@ -105,6 +110,25 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
     setTimeout(() => setMessageCompte(''), 2000);
   };
 
+  const handleAjouterCategorie = () => {
+    const nom = nouvelleCategorie.trim();
+    if (!nom) return;
+    if (categories.some((c) => c.toLowerCase() === nom.toLowerCase())) {
+      setMessageCategorie('Cette catégorie existe déjà');
+      setTimeout(() => setMessageCategorie(''), 2000);
+      return;
+    }
+    ajouterCategorie(nom);
+    setNouvelleCategorie('');
+  };
+
+  const handleSupprimerCategorie = (nom: string) => {
+    const confirme = window.confirm(
+      `Supprimer la catégorie "${nom}" ? Les articles déjà classés dedans garderont cette catégorie.`
+    );
+    if (confirme) supprimerCategorie(nom);
+  };
+
   return (
     <div className="parametres">
       <h2>Paramètres</h2>
@@ -141,6 +165,51 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
               Enregistrer
             </button>
             {messageInfos && <span className="parametres-message">{messageInfos}</span>}
+          </div>
+        </div>
+      </section>
+
+      <section className="parametres-section">
+        <h3>Catégories de produits</h3>
+        <div className="parametres-carte">
+          <p className="parametres-sous-titre">
+            Ajoute, renomme ou supprime les catégories utilisées dans "Menu / produits".
+          </p>
+          <ul className="parametres-liste-categories">
+            {categories.map((cat) => (
+              <li key={cat} className="parametres-categorie-ligne">
+                <span>{cat}</span>
+                <button
+                  type="button"
+                  className="parametres-categorie-supprimer"
+                  onClick={() => handleSupprimerCategorie(cat)}
+                >
+                  Supprimer
+                </button>
+              </li>
+            ))}
+          </ul>
+          <div className="parametres-actions">
+            <input
+              type="text"
+              placeholder="Nouvelle catégorie (ex: Épicerie)"
+              value={nouvelleCategorie}
+              onChange={(e) => setNouvelleCategorie(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  handleAjouterCategorie();
+                }
+              }}
+            />
+            <button className="parametres-bouton" onClick={handleAjouterCategorie}>
+              Ajouter
+            </button>
+            {messageCategorie && (
+              <span className="parametres-message parametres-message-erreur">
+                {messageCategorie}
+              </span>
+            )}
           </div>
         </div>
       </section>

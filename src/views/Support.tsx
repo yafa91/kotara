@@ -28,7 +28,7 @@ export default function Support({ planActuel }: SupportProps) {
 
       <div className="support-carte">
         <p className="support-label">Horaires</p>
-        <p className="support-valeur">Lundi - Samedi, 8h - 20h</p>
+        <p className="support-valeur">Lundi - Samedi, 11h - 18h</p>
       </div>
 
       <div className="support-carte support-carte-distance">

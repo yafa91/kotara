@@ -1,13 +1,11 @@
-import { useState } from 'react';
-import { useMenu, useTicket, useHistorique, useParametres } from '../store/AppDataContext';
+import { useState, useEffect, useRef } from 'react';
+import { Html5Qrcode } from 'html5-qrcode';
+import { ScanLine } from 'lucide-react';
+import { useMenu, useTicket, useHistorique, useParametres, useDevise } from '../store/AppDataContext';
 import type { ModePaiement } from '../types';
+import { formatMontant } from '../lib/formatMontant';
 import './PriseCommande.css';
 import './ScannerProduit.css';
-
-const LABELS_PAIEMENT: Record<'espece' | 'mobile_money', string> = {
-  espece: 'Espèces',
-  mobile_money: 'Mobile Money',
-};
 
 export default function ScannerProduit() {
   const [recherche, setRecherche] = useState('');
@@ -21,6 +19,52 @@ export default function ScannerProduit() {
     null
   );
 
+  // --- Scanner caméra ---
+  const [scannerOuvert, setScannerOuvert] = useState(false);
+  const [erreurScan, setErreurScan] = useState<string | null>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
+
+  useEffect(() => {
+    if (!scannerOuvert) return;
+
+    const scanner = new Html5Qrcode('zone-scan-camera');
+    scannerRef.current = scanner;
+    setErreurScan(null);
+
+    scanner
+      .start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 250, height: 150 } },
+        (codeDetecte) => {
+          const article = articles.find((a) => a.codeBarre === codeDetecte);
+          if (article) {
+            ajouterArticle(article);
+            setScannerOuvert(false);
+          } else {
+            setErreurScan(`Aucun produit ne correspond au code ${codeDetecte}`);
+          }
+        },
+        () => {
+          // erreurs de lecture image par image : on ignore, c'est normal
+        }
+      )
+      .catch(() => {
+        setErreurScan("Impossible d'accéder à la caméra.");
+      });
+
+    return () => {
+      // stop() est asynchrone : il faut attendre qu'il se termine avant
+      // d'appeler clear(), sinon html5-qrcode lève "Cannot clear while
+      // scan is ongoing" et fait planter le composant React.
+      scanner
+        .stop()
+        .catch(() => {})
+        .finally(() => {
+          scanner.clear();
+        });
+    };
+  }, [scannerOuvert, articles, ajouterArticle]);
+
   const articlesFiltres = articles.filter(
     (a) =>
       a.actif &&
@@ -28,16 +72,18 @@ export default function ScannerProduit() {
   );
 
   const totalArticles = lignes.reduce((s, l) => s + l.quantite, 0);
-  const formatPrix = (n: number) => `${n.toLocaleString('fr-FR')} FCFA`;
+  const devise = useDevise();
+  const formatPrix = (n: number) => formatMontant(n, devise);
+  const labelMobileMoney = devise === 'XOF' ? 'Mobile Money' : 'Carte bancaire';
 
   const handleAjouterEtViderRecherche = (article: (typeof articles)[number]) => {
     ajouterArticle(article);
     setRecherche('');
   };
 
-  const handleImprimerEtEncaisser = () => {
+  const handleImprimerEtEncaisser = async () => {
     if (lignes.length === 0 || !modePaiementChoisi) return;
-    encaisser(lignes, total, modePaiementChoisi as ModePaiement);
+    await encaisser(lignes, total, modePaiementChoisi as ModePaiement);
     window.print();
     viderTicket();
     setTicketOuvert(false);
@@ -57,6 +103,14 @@ export default function ScannerProduit() {
             value={recherche}
             onChange={(e) => setRecherche(e.target.value)}
           />
+          <button
+            type="button"
+            className="bouton-scan-camera"
+            onClick={() => setScannerOuvert(true)}
+            title="Scanner avec la caméra"
+          >
+            <ScanLine size={20} />
+          </button>
         </div>
       </div>
 
@@ -93,6 +147,21 @@ export default function ScannerProduit() {
         🛒
         {totalArticles > 0 && <span className="panier-flottant-badge">{totalArticles}</span>}
       </button>
+
+      {scannerOuvert && (
+        <div className="scanner-overlay">
+          <div className="scanner-panel">
+            <div className="scanner-panel-header">
+              <h3>Scanner un produit</h3>
+              <button className="ticket-fermer" onClick={() => setScannerOuvert(false)}>
+                ✕
+              </button>
+            </div>
+            <div id="zone-scan-camera" className="zone-scan-camera" />
+            {erreurScan && <p className="scanner-erreur">{erreurScan}</p>}
+          </div>
+        </div>
+      )}
 
       {ticketOuvert && (
         <>
@@ -168,7 +237,7 @@ export default function ScannerProduit() {
                 }`}
                 onClick={() => setModePaiementChoisi('mobile_money')}
               >
-                Mobile Money
+                {labelMobileMoney}
               </button>
             </div>
 
@@ -201,7 +270,11 @@ export default function ScannerProduit() {
               </div>
               <p className="impression-paiement">
                 Mode de règlement :{' '}
-                {modePaiementChoisi ? LABELS_PAIEMENT[modePaiementChoisi] : ''}
+                {modePaiementChoisi === 'espece'
+                  ? 'Espèces'
+                  : modePaiementChoisi === 'mobile_money'
+                  ? labelMobileMoney
+                  : ''}
               </p>
             </div>
           </div>

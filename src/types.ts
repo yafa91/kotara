@@ -1,4 +1,4 @@
-export type Categorie = 'Plats' | 'Boissons' | 'Frites' | 'Desserts' | 'Sandwichs' | 'Salades' | 'Sauces' | 'Menus' | 'Pates' | 'Autres'   ;
+export type Categorie = string;
 
 export type ModePaiement = 'espece' | 'mobile_money' | 'en_attente';
 
@@ -11,6 +11,9 @@ export interface ArticleMenu {
   photo?: string;
   actif: boolean;
   commentaire?: string;
+  codeBarre?: string;
+  stock: number;
+  seuilAlerte: number;
 }
 
 export interface LigneTicket {

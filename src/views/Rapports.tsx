@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react';
 import { useHistorique } from '../store/AppDataContext';
 import BarChart from '../components/BarChart';
 import './Rapports.css';
+import { useDevise } from '../store/AppDataContext';
+import { formatMontant } from '../lib/formatMontant';
 
 type Periode = 7 | 30;
 
@@ -17,7 +19,8 @@ export default function Rapports() {
   const { commandes } = useHistorique();
   const [periode, setPeriode] = useState<Periode>(7);
 
-  const formatPrix = (n: number) => `${Math.round(n).toLocaleString('fr-FR')} FCFA`;
+  const devise = useDevise();
+  const formatPrix = (n: number) => formatMontant(n, devise);
 
   // Commandes réellement payées uniquement
   const commandesPayees = useMemo(

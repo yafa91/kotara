@@ -1,28 +1,18 @@
 import { useState } from 'react';
-import { useMenu, useTicket, useHistorique, useParametres } from '../store/AppDataContext';
+import {
+  useMenu,
+  useTicket,
+  useHistorique,
+  useParametres,
+  useCategories,
+  useDevise,
+} from '../store/AppDataContext';
 import type { Categorie, ModePaiement } from '../types';
+import { formatMontant } from '../lib/formatMontant';
 import './PriseCommande.css';
 
-const CATEGORIES: ('Tout' | Categorie)[] = [
-  'Tout',
-  'Plats',
-  'Boissons',
-  'Desserts',
-  'Frites',
-  'Sandwichs',
-  'Salades',
-  'Sauces',
-  'Menus',
-  'Pates',
-  'Autres',
-];
-
-const LABELS_PAIEMENT: Record<'espece' | 'mobile_money', string> = {
-  espece: 'Espèces',
-  mobile_money: 'Mobile Money',
-};
-
 export default function PriseCommande() {
+  const { categories } = useCategories();
   const [categorieActive, setCategorieActive] = useState<'Tout' | Categorie>('Tout');
   const { articles } = useMenu();
   const { lignes, ajouterArticle, retirerArticle, viderTicket, total } = useTicket();
@@ -33,6 +23,7 @@ export default function PriseCommande() {
   const [modePaiementChoisi, setModePaiementChoisi] = useState<'espece' | 'mobile_money' | null>(
     null
   );
+  const [enTraitement, setEnTraitement] = useState(false);
 
   const articlesFiltres = articles.filter(
     (a) => a.actif && (categorieActive === 'Tout' || a.categorie === categorieActive)
@@ -40,12 +31,16 @@ export default function PriseCommande() {
 
   const totalArticles = lignes.reduce((s, l) => s + l.quantite, 0);
 
-  const formatPrix = (n: number) => `${n.toLocaleString('fr-FR')} FCFA`;
+  const devise = useDevise();
+  const formatPrix = (n: number) => formatMontant(n, devise);
+  const labelMobileMoney = devise === 'XOF' ? 'Mobile Money' : 'Carte bancaire';
 
-  const handleImprimerEtEncaisser = () => {
-    if (lignes.length === 0 || !modePaiementChoisi) return;
+  const handleImprimerEtEncaisser = async () => {
+    if (lignes.length === 0 || !modePaiementChoisi || enTraitement) return;
 
-    encaisser(lignes, total, modePaiementChoisi as ModePaiement);
+    setEnTraitement(true);
+    await encaisser(lignes, total, modePaiementChoisi as ModePaiement);
+    setEnTraitement(false);
 
     // window.print() est bloquant : le code reprend seulement une fois
     // la boîte de dialogue d'impression fermée par l'utilisateur.
@@ -61,7 +56,13 @@ export default function PriseCommande() {
       <div className="prise-commande-header">
         <h2>Nouvelle commande</h2>
         <div className="categories-row">
-          {CATEGORIES.map((cat) => (
+          <button
+            className={`categorie-chip ${categorieActive === 'Tout' ? 'categorie-chip-actif' : ''}`}
+            onClick={() => setCategorieActive('Tout')}
+          >
+            Tout
+          </button>
+          {categories.map((cat) => (
             <button
               key={cat}
               className={`categorie-chip ${categorieActive === cat ? 'categorie-chip-actif' : ''}`}
@@ -144,7 +145,7 @@ export default function PriseCommande() {
                             id: ligne.articleId,
                             nom: ligne.nom,
                             prix: ligne.prixUnitaire,
-                            categorie: 'Plats',
+                            categorie: categorieActive === 'Tout' ? 'Autres' : categorieActive,
                             icone: '',
                             actif: true,
                           })
@@ -179,16 +180,16 @@ export default function PriseCommande() {
                 }`}
                 onClick={() => setModePaiementChoisi('mobile_money')}
               >
-                Mobile Money
+                {labelMobileMoney}
               </button>
             </div>
 
             <button
               className="bouton-paiement bouton-imprimer"
-              disabled={lignes.length === 0 || !modePaiementChoisi}
+              disabled={lignes.length === 0 || !modePaiementChoisi || enTraitement}
               onClick={handleImprimerEtEncaisser}
             >
-              🖨️ Imprimer le ticket
+              {enTraitement ? 'Enregistrement...' : '🖨️ Imprimer le ticket'}
             </button>
 
             {/* Zone visible uniquement à l'impression */}
@@ -213,7 +214,11 @@ export default function PriseCommande() {
               </div>
               <p className="impression-paiement">
                 Mode de règlement :{' '}
-                {modePaiementChoisi ? LABELS_PAIEMENT[modePaiementChoisi] : ''}
+                {modePaiementChoisi === 'espece'
+                  ? 'Espèces'
+                  : modePaiementChoisi === 'mobile_money'
+                  ? labelMobileMoney
+                  : ''}
               </p>
             </div>
           </div>

@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import PaiementMockup from './PaiementMockup';
+import { useDevise } from '../store/AppDataContext';
 import './AbonnementDetail.css';
 
 interface Plan {
   id: string;
   nom: string;
-  prix: string;
+  prixParDevise: {
+    EUR: string;
+    XOF: string;
+  };
   fonctionnalites: string[];
 }
 
@@ -13,7 +17,10 @@ const PLANS: Plan[] = [
   {
     id: 'standard',
     nom: 'Standard',
-    prix: '20 000 FCFA / mois',
+    prixParDevise: {
+      EUR: '20 € / mois',
+      XOF: '15 000 FCFA / mois',
+    },
     fonctionnalites: [
       'Prise de commande',
       'Gestion de caisse',
@@ -24,7 +31,10 @@ const PLANS: Plan[] = [
   {
     id: 'premium',
     nom: 'Premium',
-    prix: '50 000 FCFA / mois',
+    prixParDevise: {
+      EUR: '49 € / mois',
+      XOF: '26 000 FCFA / mois',
+    },
     fonctionnalites: [
       'Tout le plan Standard',
       'Rapports avancés',
@@ -50,8 +60,11 @@ export default function AbonnementDetail({
   onRetour,
   onChangerPlan,
 }: AbonnementDetailProps) {
+  const devise = useDevise();
   const [planEnPaiement, setPlanEnPaiement] = useState<Plan | null>(null);
   const [confirmation, setConfirmation] = useState(false);
+
+  const prixAffiche = (plan: Plan) => plan.prixParDevise[devise];
 
   const handleClicPlan = (plan: Plan) => {
     setPlanEnPaiement(plan);
@@ -76,7 +89,7 @@ export default function AbonnementDetail({
     return (
       <PaiementMockup
         planNom={planEnPaiement.nom}
-        planPrix={planEnPaiement.prix}
+        planPrix={prixAffiche(planEnPaiement)}
         onSucces={handleSucces}
         onAnnuler={() => setPlanEnPaiement(null)}
       />
@@ -120,7 +133,7 @@ export default function AbonnementDetail({
               className={`plan-carte ${estPlanActuel ? 'plan-carte-actif' : ''}`}
             >
               <p className="plan-nom">{plan.nom}</p>
-              <p className="plan-prix">{plan.prix}</p>
+              <p className="plan-prix">{prixAffiche(plan)}</p>
               <ul className="plan-fonctionnalites">
                 {plan.fonctionnalites.map((f) => (
                   <li key={f}>{f}</li>

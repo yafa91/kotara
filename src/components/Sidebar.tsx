@@ -6,6 +6,7 @@ export type VueActive =
   | 'caisse'
   | 'historique'
   | 'menu'
+  | 'inventaire'
   | 'employes'
   | 'rapports'
   | 'comptabilite'
@@ -38,6 +39,7 @@ export default function Sidebar({
     { id: 'caisse', label: 'Caisse' },
     { id: 'historique', label: 'Historique' },
     { id: 'menu', label: estMagasin ? 'Ajouter des produits' : 'Menu / produits' },
+    { id: 'inventaire', label: 'Inventaire' },
     { id: 'employes', label: 'Employés', premium: true },
     { id: 'rapports', label: 'Rapports', premium: true },
     { id: 'comptabilite', label: 'Comptabilité' },
@@ -67,17 +69,9 @@ export default function Sidebar({
         </button>
       ))}
 
-      <div className="sidebar-session">
-        <div className="sidebar-session-info">
-          <span className="sidebar-session-nom">{session.nom}</span>
-          <span className={`sidebar-session-role sidebar-session-role-${session.role}`}>
-            {session.role === 'gerant' ? 'Gérant' : 'Employé'}
-          </span>
-        </div>
-        <button className="sidebar-session-changer" onClick={onDeconnexionSession}>
-          Changer
-        </button>
-      </div>
+      <button className="sidebar-item sidebar-item-deconnexion" onClick={onDeconnexionSession}>
+        Me déconnecter
+      </button>
     </nav>
   );
 }

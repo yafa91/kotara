@@ -8,6 +8,7 @@ import type { VueActive } from './components/Sidebar';
 import PriseCommande from './views/PriseCommande';
 import ScannerProduit from './views/ScannerProduit';
 import MenuProduits from './views/MenuProduits';
+import Inventaire from './views/Inventaire';
 import Caisse from './views/Caisse';
 import Historique from './views/Historique';
 import Rapports from './views/Rapports';
@@ -15,7 +16,7 @@ import Employes from './views/Employes';
 import ServiceFerme from './components/ServiceFerme';
 import SplashScreen from './components/SplashScreen';
 import LoginScreen from './components/LoginScreen';
-import SelectionEmploye, { type Session } from './components/SelectionEmploye';
+import type { Session } from './components/SelectionEmploye';
 import { AppDataProvider, useService } from './store/AppDataContext';
 import { supabase } from './lib/supabaseClient';
 import './App.css';
@@ -38,11 +39,11 @@ function AppAuthentifie({
 }) {
   const [vueActive, setVueActive] = useState<VueActive>('commande');
   const { serviceOuvertAujourdHui } = useService();
-  const [session, setSession] = useState<Session | null>(null);
+  const [session] = useState<Session>({ nom: 'Gérant', role: 'gerant' });
   const [planActuel, setPlanActuel] = useState<'standard' | 'premium'>('standard');
 
   const handleDeconnexionSession = () => {
-    setSession(null);
+    onDeconnexionCompte();
     setVueActive('commande');
   };
 
@@ -59,6 +60,8 @@ function AppAuthentifie({
         return <Historique />;
       case 'menu':
         return <MenuProduits />;
+      case 'inventaire':
+        return <Inventaire />;
       case 'employes':
         return <Employes />;
       case 'rapports':
@@ -73,11 +76,6 @@ function AppAuthentifie({
         return null;
     }
   };
-
-  if (!session)
-    return (
-      <SelectionEmploye onConnecte={setSession} onDeconnexionCompte={onDeconnexionCompte} />
-    );
 
   return (
     <div className="app-layout">
@@ -257,7 +255,11 @@ export default function App() {
   }
 
   return (
-    <AppDataProvider restaurantId={restaurantId} devise={devise}>
+    <AppDataProvider
+      restaurantId={restaurantId}
+      devise={devise}
+      typeEtablissement={typeEtablissement}
+    >
       <AppAuthentifie
         restaurantId={restaurantId}
         typeEtablissement={typeEtablissement}

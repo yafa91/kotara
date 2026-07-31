@@ -1,6 +1,13 @@
 import { useMemo, useState } from 'react';
-import { useHistorique, useService, useParametres, useSortiesCaisse } from '../store/AppDataContext';
+import {
+  useHistorique,
+  useService,
+  useParametres,
+  useSortiesCaisse,
+  useDevise,
+} from '../store/AppDataContext';
 import PavePinCode from '../components/PavePinCode';
+import { formatMontant } from '../lib/formatMontant';
 import './Caisse.css';
 
 function dateDuJour() {
@@ -19,13 +26,16 @@ export default function Caisse() {
   const [dateSelectionnee, setDateSelectionnee] = useState(dateDuJour());
   const [modeComptage, setModeComptage] = useState(false);
   const [montantSaisi, setMontantSaisi] = useState('');
+  const [clotureEnCours, setClotureEnCours] = useState(false);
 
   const [modeSortie, setModeSortie] = useState(false);
   const [motifSortie, setMotifSortie] = useState('');
   const [montantSortie, setMontantSortie] = useState('');
   const [erreurSortie, setErreurSortie] = useState('');
 
-  const formatPrix = (n: number) => `${n.toLocaleString('fr-FR')} FCFA`;
+  const devise = useDevise();
+  const formatPrix = (n: number) => formatMontant(n, devise);
+  const labelMobileMoney = devise === 'XOF' ? 'Mobile Money' : 'Carte bancaire';
   const formatHeure = (iso: string) =>
     new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
@@ -96,19 +106,21 @@ export default function Caisse() {
   const ecart = montantSaisiNombre - totalEspeces;
   const saisieValide = montantSaisi !== '' && !Number.isNaN(montantSaisiNombre);
 
-  const handleConfirmerCloture = () => {
-    if (!saisieValide) return;
-    cloturerServiceAvecComptage({
+  const handleConfirmerCloture = async () => {
+    if (!saisieValide || clotureEnCours) return;
+    setClotureEnCours(true);
+    await cloturerServiceAvecComptage({
       montantEspecesReel: montantSaisiNombre,
       totalEspecesTheorique: totalEspeces,
       totalMobileMoney,
       totalGeneral: totalJour,
     });
+    setClotureEnCours(false);
     setModeComptage(false);
     setMontantSaisi('');
   };
 
-  const handleAjouterSortie = (e: React.FormEvent) => {
+  const handleAjouterSortie = async (e: React.FormEvent) => {
     e.preventDefault();
     setErreurSortie('');
     const montantNombre = Number(montantSortie);
@@ -120,7 +132,7 @@ export default function Caisse() {
       setErreurSortie('Le montant doit être un nombre supérieur à 0.');
       return;
     }
-    ajouterSortieCaisse(motifSortie.trim(), montantNombre);
+    await ajouterSortieCaisse(motifSortie.trim(), montantNombre);
     setMotifSortie('');
     setMontantSortie('');
     setModeSortie(false);
@@ -152,7 +164,7 @@ export default function Caisse() {
           ) : (
             <>
               <span className="statut-service statut-ferme">Service non démarré</span>
-              <button className="bouton-demarrer" onClick={demarrerService}>
+              <button className="bouton-demarrer" onClick={() => demarrerService()}>
                 Démarrer le service
               </button>
             </>
@@ -173,7 +185,7 @@ export default function Caisse() {
           <input
             type="number"
             className="comptage-input"
-            placeholder="Montant réel compté (FCFA)"
+            placeholder={`Montant réel compté (${devise === 'XOF' ? 'FCFA' : '€'})`}
             value={montantSaisi}
             onChange={(e) => setMontantSaisi(e.target.value)}
           />
@@ -196,10 +208,10 @@ export default function Caisse() {
             </button>
             <button
               className="bouton-confirmer-cloture"
-              disabled={!saisieValide}
+              disabled={!saisieValide || clotureEnCours}
               onClick={handleConfirmerCloture}
             >
-              Confirmer la clôture
+              {clotureEnCours ? 'Clôture en cours...' : 'Confirmer la clôture'}
             </button>
           </div>
         </div>
@@ -211,7 +223,7 @@ export default function Caisse() {
           <span className="recap-valeur">{formatPrix(totalEspeces)}</span>
         </div>
         <div className="recap-carte">
-          <span className="recap-label">Mobile Money</span>
+          <span className="recap-label">{labelMobileMoney}</span>
           <span className="recap-valeur">{formatPrix(totalMobileMoney)}</span>
         </div>
         <div className="recap-carte">
@@ -246,7 +258,7 @@ export default function Caisse() {
             />
             <input
               type="number"
-              placeholder="Montant (FCFA)"
+              placeholder={`Montant (${devise === 'XOF' ? 'FCFA' : '€'})`}
               value={montantSortie}
               onChange={(e) => setMontantSortie(e.target.value)}
             />
@@ -322,7 +334,7 @@ export default function Caisse() {
                   className="bouton-encaisser bouton-mobile"
                   onClick={() => marquerPayee(commande.id, 'mobile_money')}
                 >
-                  Mobile Money
+                  {labelMobileMoney}
                 </button>
               </div>
             </div>

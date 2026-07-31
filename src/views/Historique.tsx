@@ -1,17 +1,12 @@
 import { useMemo, useState } from 'react';
-import { useHistorique } from '../store/AppDataContext';
+import { useHistorique, useDevise } from '../store/AppDataContext';
 import type { ModePaiement } from '../types';
+import { formatMontant } from '../lib/formatMontant';
 import './Historique.css';
 
 function dateDuJour() {
   return new Date().toISOString().slice(0, 10);
 }
-
-const LABELS_PAIEMENT: Record<ModePaiement, string> = {
-  espece: 'Espèces',
-  mobile_money: 'Mobile Money',
-  en_attente: 'En attente',
-};
 
 const COULEURS_PAIEMENT: Record<ModePaiement, string> = {
   espece: '#3B6D11',
@@ -21,12 +16,19 @@ const COULEURS_PAIEMENT: Record<ModePaiement, string> = {
 
 export default function Historique() {
   const { commandes } = useHistorique();
+  const devise = useDevise();
 
   const [dateSelectionnee, setDateSelectionnee] = useState(dateDuJour());
   const [recherche, setRecherche] = useState('');
   const [filtrePaiement, setFiltrePaiement] = useState<'tout' | ModePaiement>('tout');
 
-  const formatPrix = (n: number) => `${n.toLocaleString('fr-FR')} FCFA`;
+  const labelPaiement = (mode: ModePaiement): string => {
+    if (mode === 'espece') return 'Espèces';
+    if (mode === 'en_attente') return 'En attente';
+    return devise === 'XOF' ? 'Mobile Money' : 'Carte bancaire';
+  };
+
+  const formatPrix = (n: number) => formatMontant(n, devise);
   const formatHeure = (iso: string) =>
     new Date(iso).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 
@@ -77,7 +79,7 @@ export default function Historique() {
           <span className="historique-recap-valeur">{formatPrix(totalEspeces)}</span>
         </div>
         <div className="historique-recap-carte">
-          <span className="historique-recap-label">Mobile Money</span>
+          <span className="historique-recap-label">{labelPaiement('mobile_money')}</span>
           <span className="historique-recap-valeur">{formatPrix(totalMobileMoney)}</span>
         </div>
         <div className="historique-recap-carte">
@@ -102,7 +104,7 @@ export default function Historique() {
               className={`filtre-chip ${filtrePaiement === mode ? 'filtre-chip-actif' : ''}`}
               onClick={() => setFiltrePaiement(mode)}
             >
-              {mode === 'tout' ? 'Tout' : LABELS_PAIEMENT[mode]}
+              {mode === 'tout' ? 'Tout' : labelPaiement(mode)}
             </button>
           ))}
         </div>
@@ -125,7 +127,7 @@ export default function Historique() {
                   className="historique-carte-badge"
                   style={{ background: COULEURS_PAIEMENT[commande.modePaiement] }}
                 >
-                  {LABELS_PAIEMENT[commande.modePaiement]}
+                  {labelPaiement(commande.modePaiement)}
                 </span>
               </div>
 
