@@ -60,12 +60,12 @@ function AppAuthentifie({
       <div className="app-layout">
         <main className="app-contenu">
           <AbonnementDetail
-            planActuel="aucun"
-            dateEcheance={planExpireLe || ''}
-            expire={true}
-            onRetour={() => {}}
-            onChangerPlan={onChangerPlan}
-          />
+  planActuel="aucun"
+  dateEcheance={planExpireLe || ''}
+  expire={true}
+  onRetour={onDeconnexionCompte}
+  onChangerPlan={onChangerPlan}
+/>
         </main>
       </div>
     );

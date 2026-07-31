@@ -114,14 +114,14 @@ export default function AbonnementDetail({
 
   return (
     <div className="abonnement-detail">
-      <button className="abonnement-retour" onClick={onRetour}>
-        ← Retour
-      </button>
+      <button className="abonnement-fermer" onClick={onRetour} aria-label="Fermer">
+  ×
+</button>
 
       <h2>Gérer l'abonnement</h2>
      <p className="abonnement-echeance">
   {!dateEcheance
-    ? "Aucun abonnement actif — choisis un plan pour commencer."
+    ? "Aucun abonnement actif, choisis un plan pour commencer."
     : expire
       ? `Ton abonnement a expiré le ${dateEcheance}.`
       : `Prochain renouvellement le ${dateEcheance}.`}

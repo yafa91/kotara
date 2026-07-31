@@ -2,19 +2,22 @@
   padding: 32px;
   max-width: 720px;
   margin: 0 auto;
+  position: relative;
 }
-
-.abonnement-retour {
+.abonnement-fermer {
   background: none;
   border: none;
   color: #555;
-  font-size: 14px;
+  font-size: 28px;
+  line-height: 1;
   cursor: pointer;
   padding: 0;
-  margin-bottom: 16px;
+  position: absolute;
+  top: 32px;
+  right: 32px;
 }
 
-.abonnement-retour:hover {
+.abonnement-fermer:hover {
   color: #FF9500;
 }
 
