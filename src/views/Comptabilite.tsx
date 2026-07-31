@@ -8,7 +8,7 @@ import { useDevise } from '../store/AppDataContext';
 import { formatMontant } from '../lib/formatMontant';
 
 interface ComptabiliteProps {
-  planActuel: 'standard' | 'premium';
+  planActuel: 'standard' | 'premium' | null;
 }
 
 interface Charge {

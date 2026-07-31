@@ -16,6 +16,7 @@ import Employes from './views/Employes';
 import ServiceFerme from './components/ServiceFerme';
 import SplashScreen from './components/SplashScreen';
 import LoginScreen from './components/LoginScreen';
+import AbonnementDetail from './views/AbonnementDetail';
 import type { Session } from './components/SelectionEmploye';
 import { AppDataProvider, useService } from './store/AppDataContext';
 import { supabase } from './lib/supabaseClient';
@@ -25,27 +26,50 @@ const VUES_EMPLOYE: VueActive[] = ['commande', 'caisse', 'historique', 'support'
 
 type TypeEtablissement = 'restaurant' | 'magasin';
 type Devise = 'EUR' | 'XOF';
+type PlanActuel = 'standard' | 'premium' | null;
 
 function AppAuthentifie({
   restaurantId,
   typeEtablissement,
   devise,
+  planActuel,
+  planExpireLe,
+  onChangerPlan,
   onDeconnexionCompte,
 }: {
   restaurantId: string;
   typeEtablissement: TypeEtablissement;
   devise: Devise;
+  planActuel: PlanActuel;
+  planExpireLe: string | null;
+  onChangerPlan: (plan: 'standard' | 'premium') => void;
   onDeconnexionCompte: () => void;
 }) {
   const [vueActive, setVueActive] = useState<VueActive>('commande');
   const { serviceOuvertAujourdHui } = useService();
   const [session] = useState<Session>({ nom: 'Gérant', role: 'gerant' });
-  const [planActuel, setPlanActuel] = useState<'standard' | 'premium'>('standard');
 
   const handleDeconnexionSession = () => {
     onDeconnexionCompte();
     setVueActive('commande');
   };
+
+  // Aucun plan actif : on bloque tout, sauf l'écran d'abonnement lui-même
+  if (!planActuel) {
+    return (
+      <div className="app-layout">
+        <main className="app-contenu">
+          <AbonnementDetail
+            planActuel="aucun"
+            dateEcheance={planExpireLe || ''}
+            expire={true}
+            onRetour={() => {}}
+            onChangerPlan={onChangerPlan}
+          />
+        </main>
+      </div>
+    );
+  }
 
   const renderVue = () => {
     switch (vueActive) {
@@ -69,7 +93,7 @@ function AppAuthentifie({
       case 'comptabilite':
         return <Comptabilite planActuel={planActuel} />;
       case 'parametres':
-        return <Parametres planActuel={planActuel} onChangerPlan={setPlanActuel} />;
+        return <Parametres planActuel={planActuel} onChangerPlan={onChangerPlan} />;
       case 'support':
         return <Support planActuel={planActuel} />;
       default:
@@ -99,6 +123,8 @@ export default function App() {
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
   const [typeEtablissement, setTypeEtablissement] = useState<TypeEtablissement>('restaurant');
   const [devise, setDevise] = useState<Devise>('EUR');
+  const [planActuel, setPlanActuelState] = useState<PlanActuel>(null);
+  const [planExpireLe, setPlanExpireLe] = useState<string | null>(null);
   const [nomRestaurantManquant, setNomRestaurantManquant] = useState(false);
   const [nomRestaurantSaisi, setNomRestaurantSaisi] = useState('');
   const [erreurRestaurant, setErreurRestaurant] = useState('');
@@ -124,7 +150,7 @@ export default function App() {
     (async () => {
       const { data: restaurantsExistants, error } = await supabase
         .from('restaurants')
-        .select('id, type_etablissement, devise')
+        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le')
         .eq('owner_id', authSession.user.id)
         .limit(1);
 
@@ -134,11 +160,12 @@ export default function App() {
       }
 
       if (restaurantsExistants && restaurantsExistants.length > 0) {
-        setRestaurantId(restaurantsExistants[0].id);
-        setTypeEtablissement(
-          (restaurantsExistants[0].type_etablissement as TypeEtablissement) || 'restaurant'
-        );
-        setDevise((restaurantsExistants[0].devise as Devise) || 'EUR');
+        const restaurant = restaurantsExistants[0];
+        setRestaurantId(restaurant.id);
+        setTypeEtablissement((restaurant.type_etablissement as TypeEtablissement) || 'restaurant');
+        setDevise((restaurant.devise as Devise) || 'EUR');
+        setPlanActuelState((restaurant.plan_actuel as PlanActuel) ?? null);
+        setPlanExpireLe(restaurant.plan_expire_le || null);
         return;
       }
 
@@ -165,7 +192,7 @@ export default function App() {
           type_etablissement: typeDepuisMetadata || 'restaurant',
           devise: deviseDepuisMetadata || 'EUR',
         })
-        .select('id, type_etablissement, devise')
+        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le')
         .single();
 
       if (erreurInsertion) {
@@ -178,6 +205,8 @@ export default function App() {
         (nouveauRestaurant.type_etablissement as TypeEtablissement) || 'restaurant'
       );
       setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
+      setPlanActuelState((nouveauRestaurant.plan_actuel as PlanActuel) ?? null);
+      setPlanExpireLe(nouveauRestaurant.plan_expire_le || null);
     })();
   }, [authSession]);
 
@@ -200,7 +229,7 @@ export default function App() {
         type_etablissement: typeDepuisMetadata || 'restaurant',
         devise: deviseDepuisMetadata || 'EUR',
       })
-      .select('id, type_etablissement, devise')
+      .select('id, type_etablissement, devise, plan_actuel, plan_expire_le')
       .single();
 
     if (error) {
@@ -214,12 +243,37 @@ export default function App() {
       (nouveauRestaurant.type_etablissement as TypeEtablissement) || 'restaurant'
     );
     setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
+    setPlanActuelState((nouveauRestaurant.plan_actuel as PlanActuel) ?? null);
+    setPlanExpireLe(nouveauRestaurant.plan_expire_le || null);
   };
 
   const handleDeconnexionCompte = async () => {
     await supabase.auth.signOut();
     setRestaurantId(null);
   };
+
+  // Rafraîchit le plan depuis la base (utile après un retour de paiement Stripe)
+  const rafraichirPlan = async () => {
+    if (!restaurantId) return;
+    const { data } = await supabase
+      .from('restaurants')
+      .select('plan_actuel, plan_expire_le')
+      .eq('id', restaurantId)
+      .single();
+
+    if (data) {
+      setPlanActuelState((data.plan_actuel as PlanActuel) ?? null);
+      setPlanExpireLe(data.plan_expire_le || null);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true') {
+      rafraichirPlan();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [restaurantId]);
 
   if (chargement) return <SplashScreen />;
   if (!authSession) return <LoginScreen onConnecte={() => {}} />;
@@ -264,6 +318,9 @@ export default function App() {
         restaurantId={restaurantId}
         typeEtablissement={typeEtablissement}
         devise={devise}
+        planActuel={planActuel}
+        planExpireLe={planExpireLe}
+        onChangerPlan={() => rafraichirPlan()}
         onDeconnexionCompte={handleDeconnexionCompte}
       />
     </AppDataProvider>

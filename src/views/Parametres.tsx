@@ -4,7 +4,7 @@ import { useParametres, useCategories } from '../store/AppDataContext';
 import './Parametres.css';
 
 interface ParametresProps {
-  planActuel: 'standard' | 'premium';
+  planActuel: 'standard' | 'premium' | null;
   onChangerPlan: (plan: 'standard' | 'premium') => void;
 }
 

@@ -16,7 +16,7 @@ export type VueActive =
 interface SidebarProps {
   vueActive: VueActive;
   onChangerVue: (vue: VueActive) => void;
-  planActuel: 'standard' | 'premium';
+  planActuel: 'standard' | 'premium' | null;
   session: Session;
   onDeconnexionSession: () => void;
   vuesAutorisees: VueActive[] | null; // null = tout est autorisé (gérant)

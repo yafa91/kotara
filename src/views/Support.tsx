@@ -1,7 +1,7 @@
 import './Support.css';
 
 interface SupportProps {
-  planActuel: 'standard' | 'premium';
+  planActuel: 'standard' | 'premium' | null;
 }
 
 export default function Support({ planActuel }: SupportProps) {
