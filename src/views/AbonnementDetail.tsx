@@ -114,18 +114,14 @@ export default function AbonnementDetail({
 
   return (
     <div className="abonnement-detail">
-      <button className="abonnement-fermer" onClick={onRetour} aria-label="Fermer">
-  ×
-</button>
-
       <h2>Gérer l'abonnement</h2>
-     <p className="abonnement-echeance">
-  {!dateEcheance
-    ? "Aucun abonnement actif, choisis un plan pour commencer."
-    : expire
-      ? `Ton abonnement a expiré le ${dateEcheance}.`
-      : `Prochain renouvellement le ${dateEcheance}.`}
-</p>
+      <p className="abonnement-echeance">
+        {!dateEcheance
+          ? "Aucun abonnement actif, choisis un plan pour commencer."
+          : expire
+            ? `Ton abonnement a expiré le ${dateEcheance}.`
+            : `Prochain renouvellement le ${dateEcheance}.`}
+      </p>
 
       {erreur && <p className="abonnement-erreur">{erreur}</p>}
 
@@ -158,6 +154,10 @@ export default function AbonnementDetail({
           );
         })}
       </div>
+
+      <button className="abonnement-annuler" onClick={onRetour}>
+        Annuler
+      </button>
     </div>
   );
 }
