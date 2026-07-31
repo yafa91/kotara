@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import PaiementMockup from './PaiementMockup';
 import { useDevise } from '../store/AppDataContext';
+import { supabase } from '../lib/supabaseClient';
 import './AbonnementDetail.css';
 
 interface Plan {
@@ -45,6 +45,9 @@ const PLANS: Plan[] = [
   },
 ];
 
+// ⚠️ Remplace par l'URL de ton projet Supabase (visible dans Project Settings > API)
+const SUPABASE_FUNCTIONS_URL = 'https://oiongrhqunlrzfuinjmy.supabase.co/functions/v1';
+
 interface AbonnementDetailProps {
   planActuel: string;
   dateEcheance: string;
@@ -61,52 +64,53 @@ export default function AbonnementDetail({
   onChangerPlan,
 }: AbonnementDetailProps) {
   const devise = useDevise();
-  const [planEnPaiement, setPlanEnPaiement] = useState<Plan | null>(null);
-  const [confirmation, setConfirmation] = useState(false);
+  const [chargement, setChargement] = useState<string | null>(null);
+  const [erreur, setErreur] = useState<string | null>(null);
 
   const prixAffiche = (plan: Plan) => plan.prixParDevise[devise];
 
-  const handleClicPlan = (plan: Plan) => {
-    setPlanEnPaiement(plan);
-  };
+  const handleClicPlan = async (plan: Plan) => {
+    setErreur(null);
+    setChargement(plan.id);
 
-  const handleSucces = () => {
-    if (planEnPaiement) {
-      onChangerPlan(planEnPaiement.id as 'standard' | 'premium');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user?.email) {
+        throw new Error('Impossible de récupérer ton compte. Reconnecte-toi.');
+      }
+
+      const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/create-checkout-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planId: plan.id,
+          email: user.email,
+          userId: user.id,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || 'Erreur lors de la création de la session de paiement');
+      }
+
+      // Redirige vers la page de paiement hébergée par Stripe
+      window.location.href = data.url;
+    } catch (err) {
+      setErreur(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setChargement(null);
     }
-    setPlanEnPaiement(null);
-    setConfirmation(true);
   };
 
   const getLabelBouton = (plan: Plan) => {
+    if (chargement === plan.id) return 'Redirection...';
     const estPlanActuel = plan.id === planActuel;
     if (estPlanActuel && expire) return 'Renouveler';
     if (estPlanActuel) return 'Plan actif';
     return 'Choisir ce plan';
   };
-
-  if (planEnPaiement) {
-    return (
-      <PaiementMockup
-        planNom={planEnPaiement.nom}
-        planPrix={prixAffiche(planEnPaiement)}
-        onSucces={handleSucces}
-        onAnnuler={() => setPlanEnPaiement(null)}
-      />
-    );
-  }
-
-  if (confirmation) {
-    return (
-      <div className="abonnement-detail">
-        <h2>Paiement réussi</h2>
-        <p className="abonnement-echeance">Ton abonnement a bien été mis à jour.</p>
-        <button className="plan-bouton" onClick={() => setConfirmation(false)}>
-          Retour
-        </button>
-      </div>
-    );
-  }
 
   return (
     <div className="abonnement-detail">
@@ -121,11 +125,13 @@ export default function AbonnementDetail({
           : `Prochain renouvellement le ${dateEcheance}.`}
       </p>
 
+      {erreur && <p className="abonnement-erreur">{erreur}</p>}
+
       <div className="plans-grille">
         {PLANS.map((plan) => {
           const estPlanActuel = plan.id === planActuel;
           const label = getLabelBouton(plan);
-          const desactive = estPlanActuel && !expire;
+          const desactive = (estPlanActuel && !expire) || chargement !== null;
 
           return (
             <div
