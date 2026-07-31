@@ -23,7 +23,7 @@ export default function Support({ planActuel }: SupportProps) {
 
       <div className="support-carte">
         <p className="support-label">Téléphone</p>
-        <p className="support-valeur">+225 00 00 00 00</p>
+        <p className="support-valeur">+33 0749451361</p>
       </div>
 
       <div className="support-carte">
