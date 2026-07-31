@@ -119,11 +119,13 @@ export default function AbonnementDetail({
       </button>
 
       <h2>Gérer l'abonnement</h2>
-      <p className="abonnement-echeance">
-        {expire
-          ? `Ton abonnement a expiré le ${dateEcheance}.`
-          : `Prochain renouvellement le ${dateEcheance}.`}
-      </p>
+     <p className="abonnement-echeance">
+  {!dateEcheance
+    ? "Aucun abonnement actif — choisis un plan pour commencer."
+    : expire
+      ? `Ton abonnement a expiré le ${dateEcheance}.`
+      : `Prochain renouvellement le ${dateEcheance}.`}
+</p>
 
       {erreur && <p className="abonnement-erreur">{erreur}</p>}
 
