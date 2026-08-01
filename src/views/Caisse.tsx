@@ -299,7 +299,7 @@ export default function Caisse() {
       <p className="caisse-sous-titre">Tickets en attente d'encaissement</p>
       {commandesEnAttente.length === 0 ? (
         <div className="caisse-vide">
-          <p>Aucun ticket en attente 🎉</p>
+          <p>Aucun ticket en attente </p>
         </div>
       ) : (
         <div className="liste-tickets-attente">

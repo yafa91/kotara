@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import jsPDF from 'jspdf';
-import { useHistorique, useMenu } from '../store/AppDataContext';
+import { useHistorique, useMenu, useExportComptable } from '../store/AppDataContext';
 import DonutChart, { type SegmentDonut } from '../components/DonutChart';
 import type { Categorie } from '../types';
 import './Comptabilite.css';
@@ -45,16 +45,27 @@ function libelleDuMois(cle: string) {
   return `${NOMS_MOIS[index]} ${annee}`;
 }
 
+// Échappe une valeur pour un champ CSV (double les guillemets, entoure de guillemets)
+function champCSV(valeur: string | number) {
+  const s = String(valeur ?? '');
+  if (s.includes(';') || s.includes('"') || s.includes('\n')) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
 export default function Comptabilite({ planActuel }: ComptabiliteProps) {
   const estPremium = planActuel === 'premium';
   const { commandes } = useHistorique();
   const { articles } = useMenu();
+  const { recupererTransactionsBrutesDuMois } = useExportComptable();
 
   const [vue, setVue] = useState<'resume' | 'bilan' | 'detail'>('resume');
   const [moisSelectionne, setMoisSelectionne] = useState<string | null>(null);
   const [chargesParMois, setChargesParMois] = useState<{ [cle: string]: Charge[] }>({});
   const [nouveauNom, setNouveauNom] = useState('');
   const [nouveauMontant, setNouveauMontant] = useState('');
+  const [exportCSVEnCours, setExportCSVEnCours] = useState(false);
 
   const devise = useDevise();
   const formatFCFA = (n: number) => formatMontant(n, devise);
@@ -214,6 +225,97 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
     doc.save(`bilan-${moisSelectionne}.pdf`);
   };
 
+  // Export brut, une ligne par article vendu, avec toutes les transactions
+  // (y compris les enregistrements "remplacés" grâce à l'inaltérabilité) —
+  // exploitable en cas de contrôle fiscal.
+  const exporterTransactionsCSV = async () => {
+    if (!moisSelectionne || exportCSVEnCours) return;
+    setExportCSVEnCours(true);
+
+    try {
+      const brut = await recupererTransactionsBrutesDuMois(moisSelectionne);
+
+      const entetes = [
+        'id_commande',
+        'numero_ticket',
+        'date_creation',
+        'date_encaissement',
+        'mode_paiement',
+        'statut',
+        'commande_remplacee_id',
+        'article',
+        'quantite',
+        'prix_unitaire',
+        'montant_ligne',
+        'total_commande',
+      ];
+
+      const lignesCSV: string[] = [entetes.join(';')];
+
+      brut.forEach((commande: any) => {
+        const estRemplacee = commande.commande_parent_id ? 'REMPLACEE' : 'ACTIVE';
+        const lignesArticles = Array.isArray(commande.lignes) ? commande.lignes : [];
+
+        if (lignesArticles.length === 0) {
+          // Sécurité : commande sans lignes, on l'exporte quand même sur une ligne
+          lignesCSV.push(
+            [
+              commande.id,
+              commande.numero,
+              commande.date_creation,
+              commande.date_encaissement || '',
+              commande.mode_paiement,
+              estRemplacee,
+              commande.commande_parent_id || '',
+              '',
+              '',
+              '',
+              '',
+              commande.total,
+            ]
+              .map(champCSV)
+              .join(';')
+          );
+          return;
+        }
+
+        lignesArticles.forEach((ligne: any) => {
+          lignesCSV.push(
+            [
+              commande.id,
+              commande.numero,
+              commande.date_creation,
+              commande.date_encaissement || '',
+              commande.mode_paiement,
+              estRemplacee,
+              commande.commande_parent_id || '',
+              ligne.nom,
+              ligne.quantite,
+              ligne.prixUnitaire,
+              ligne.prixUnitaire * ligne.quantite,
+              commande.total,
+            ]
+              .map(champCSV)
+              .join(';')
+          );
+        });
+      });
+
+      const contenu = '\uFEFF' + lignesCSV.join('\n'); // \uFEFF = BOM pour Excel/accents
+      const blob = new Blob([contenu], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const lien = document.createElement('a');
+      lien.href = url;
+      lien.download = `transactions-${moisSelectionne}.csv`;
+      document.body.appendChild(lien);
+      lien.click();
+      document.body.removeChild(lien);
+      URL.revokeObjectURL(url);
+    } finally {
+      setExportCSVEnCours(false);
+    }
+  };
+
   if (vue === 'detail' && moisSelectionne) {
     const revenus = getRevenusDuMois(moisSelectionne);
     const charges = getTotalChargesDuMois(moisSelectionne);
@@ -229,6 +331,13 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
           </button>
           <button className="comptabilite-bouton" onClick={exporterPDF}>
             Exporter en PDF
+          </button>
+          <button
+            className="comptabilite-bouton"
+            onClick={exporterTransactionsCSV}
+            disabled={exportCSVEnCours}
+          >
+            {exportCSVEnCours ? 'Export en cours...' : 'Exporter les transactions (CSV)'}
           </button>
         </div>
         <h2>Détail — {libelleDuMois(moisSelectionne)}</h2>

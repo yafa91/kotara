@@ -158,6 +158,8 @@ interface AppDataValue {
   modifierEmploye: (id: string, changements: Partial<Employe>) => Promise<void>;
   supprimerEmploye: (id: string) => Promise<void>;
   trouverEmployeParCode: (code: string) => Employe | null;
+
+  recupererTransactionsBrutesDuMois: (cleMois: string) => Promise<any[]>;
 }
 
 const AppDataContext = createContext<AppDataValue | undefined>(undefined);
@@ -393,7 +395,19 @@ export function AppDataProvider({
       if (erreurCmds) {
         console.error('Erreur chargement commandes :', erreurCmds.message);
       } else {
-        setCommandes((cmds || []).map(ligneCommandeVersCommande));
+        // Inaltérabilité : chaque changement d'état d'un ticket (ex: passage
+        // "en attente" -> "payé") crée un NOUVEL enregistrement en base plutôt
+        // que de modifier l'original (voir marquerPayee). L'original reste
+        // donc intact pour toujours (traçabilité complète), mais on ne veut
+        // afficher dans l'app que la version la plus récente de chaque ticket.
+        // On masque donc ici les enregistrements qui ont été "remplacés" par
+        // un enregistrement plus récent (identifiés via commande_parent_id).
+        const brut = cmds || [];
+        const idsRemplaces = new Set(
+          brut.map((c: any) => c.commande_parent_id).filter(Boolean)
+        );
+        const effectives = brut.filter((c: any) => !idsRemplaces.has(c.id));
+        setCommandes(effectives.map(ligneCommandeVersCommande));
       }
 
       if (erreurClos) {
@@ -526,22 +540,41 @@ export function AppDataProvider({
     return numero;
   };
 
+  // Inaltérabilité : on ne modifie JAMAIS un enregistrement de commande déjà
+  // créé. Pour faire passer un ticket "en attente" à "payé", on INSÈRE un
+  // nouvel enregistrement (lié à l'original via commande_parent_id) plutôt
+  // que d'écraser la ligne existante avec un UPDATE. L'original reste donc
+  // consultable pour toujours dans la base, intact, pour l'export/l'audit.
   const marquerPayee: AppDataValue['marquerPayee'] = async (id, modePaiement) => {
+    const commandeOriginale = commandes.find((c) => c.id === id);
+    if (!commandeOriginale) return;
+
     const maintenant = new Date().toISOString();
-    const { error } = await supabase
+
+    const { data, error } = await supabase
       .from('commandes')
-      .update({ mode_paiement: modePaiement, date_encaissement: maintenant })
-      .eq('id', id);
+      .insert({
+        restaurant_id: restaurantId,
+        numero: commandeOriginale.numero,
+        lignes: commandeOriginale.lignes,
+        mode_paiement: modePaiement,
+        date_creation: commandeOriginale.dateCreation,
+        date_encaissement: maintenant,
+        total: commandeOriginale.total,
+        commande_parent_id: id,
+      })
+      .select('*')
+      .single();
 
     if (error) {
-      console.error('Erreur mise à jour paiement :', error.message);
+      console.error('Erreur enregistrement paiement :', error.message);
       return;
     }
 
+    // On remplace uniquement l'AFFICHAGE dans l'état local (l'enregistrement
+    // "en_attente" d'origine, lui, reste intact et inchangé en base).
     setCommandes((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, modePaiement, dateEncaissement: maintenant } : c
-      )
+      prev.map((c) => (c.id === id ? ligneCommandeVersCommande(data) : c))
     );
   };
 
@@ -666,6 +699,32 @@ export function AppDataProvider({
     setSortiesCaisse((prev) => [ligneSortieVersSortie(data), ...prev]);
   };
 
+  // ---- EXPORT COMPTABLE (archivage) ----
+  // Va chercher TOUTES les lignes brutes en base pour un mois donné, y
+  // compris les enregistrements "remplacés" (ex: anciens statuts "en_attente"
+  // conservés grâce à l'inaltérabilité) — nécessaire pour un export complet
+  // exploitable en cas de contrôle fiscal.
+  const recupererTransactionsBrutesDuMois: AppDataValue['recupererTransactionsBrutesDuMois'] =
+    async (cleMois) => {
+      const [annee, mois] = cleMois.split('-').map(Number);
+      const debut = new Date(Date.UTC(annee, mois - 1, 1)).toISOString();
+      const fin = new Date(Date.UTC(annee, mois, 1)).toISOString();
+
+      const { data, error } = await supabase
+        .from('commandes')
+        .select('*')
+        .eq('restaurant_id', restaurantId)
+        .gte('date_creation', debut)
+        .lt('date_creation', fin)
+        .order('date_creation', { ascending: true });
+
+      if (error) {
+        console.error('Erreur export brut transactions :', error.message);
+        return [];
+      }
+      return data || [];
+    };
+
   const valeur: AppDataValue = {
     devise,
     menu,
@@ -698,6 +757,7 @@ export function AppDataProvider({
     modifierEmploye,
     supprimerEmploye,
     trouverEmployeParCode,
+    recupererTransactionsBrutesDuMois,
   };
 
   return <AppDataContext.Provider value={valeur}>{children}</AppDataContext.Provider>;
@@ -769,4 +829,9 @@ export function useParametres() {
 export function useSortiesCaisse() {
   const { sortiesCaisse, ajouterSortieCaisse } = useAppData();
   return { sortiesCaisse, ajouterSortieCaisse };
+}
+
+export function useExportComptable() {
+  const { recupererTransactionsBrutesDuMois } = useAppData();
+  return { recupererTransactionsBrutesDuMois };
 }
