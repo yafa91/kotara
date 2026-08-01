@@ -46,7 +46,9 @@ function EcranTelephoneBloque() {
   return (
     <div className="app-verification-restaurant">
       <div style={{ textAlign: 'center', padding: '40px 24px' }}>
-        <h2>Kotara n'est pas disponible sur téléphone</h2>
+        <h2>
+          <span style={{ color: '#FF9500' }}>K</span>otara n'est pas disponible sur téléphone
+        </h2>
         <p>
           Ce logiciel de caisse est conçu pour une utilisation sur tablette ou ordinateur.
           Merci d'ouvrir Kotara depuis un appareil avec un écran plus grand.

@@ -175,11 +175,11 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
     y += 12;
 
     doc.setFontSize(11);
-    doc.text(`Revenus: ${revenus.toLocaleString('fr-FR')} FCFA`, 14, y);
+    doc.text(`Revenus: ${formatFCFA(revenus)}`, 14, y);
     y += 8;
-    doc.text(`Charges: ${charges.toLocaleString('fr-FR')} FCFA`, 14, y);
+    doc.text(`Charges: ${formatFCFA(charges)}`, 14, y);
     y += 8;
-    doc.text(`Benefice net: ${(revenus - charges).toLocaleString('fr-FR')} FCFA`, 14, y);
+    doc.text(`Benefice net: ${formatFCFA(revenus - charges)}`, 14, y);
     y += 14;
 
     doc.setFontSize(13);
@@ -187,7 +187,7 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
     y += 8;
     doc.setFontSize(10);
     ventes.forEach((v) => {
-      doc.text(`${v.label}: ${v.valeur.toLocaleString('fr-FR')} FCFA`, 14, y);
+      doc.text(`${v.label}: ${formatFCFA(v.valeur)}`, 14, y);
       y += 6;
     });
     y += 8;
@@ -197,7 +197,7 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
     y += 8;
     doc.setFontSize(10);
     topProduits.forEach((p) => {
-      doc.text(`${p.nom} - Qte: ${p.quantite} - ${p.montant.toLocaleString('fr-FR')} FCFA`, 14, y);
+      doc.text(`${p.nom} - Qte: ${p.quantite} - ${formatFCFA(p.montant)}`, 14, y);
       y += 6;
     });
     y += 8;
@@ -207,7 +207,7 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
     y += 8;
     doc.setFontSize(10);
     listeCharges.forEach((c) => {
-      doc.text(`${c.nom}: ${c.montant.toLocaleString('fr-FR')} FCFA`, 14, y);
+      doc.text(`${c.nom}: ${formatFCFA(c.montant)}`, 14, y);
       y += 6;
     });
 
@@ -320,7 +320,7 @@ export default function Comptabilite({ planActuel }: ComptabiliteProps) {
             />
             <input
               type="number"
-              placeholder="Montant (FCFA)"
+              placeholder={`Montant (${devise === 'XOF' ? 'FCFA' : '€'})`}
               value={nouveauMontant}
               onChange={(e) => setNouveauMontant(e.target.value)}
             />
