@@ -28,6 +28,34 @@ type TypeEtablissement = 'restaurant' | 'magasin';
 type Devise = 'EUR' | 'XOF';
 type PlanActuel = 'standard' | 'premium' | null;
 
+function useEstTelephone() {
+  const [estTelephone, setEstTelephone] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const verifier = () => setEstTelephone(window.innerWidth < 768);
+    window.addEventListener('resize', verifier);
+    return () => window.removeEventListener('resize', verifier);
+  }, []);
+
+  return estTelephone;
+}
+
+function EcranTelephoneBloque() {
+  return (
+    <div className="app-verification-restaurant">
+      <div style={{ textAlign: 'center', padding: '40px 24px' }}>
+        <h2>Kotara n'est pas disponible sur téléphone</h2>
+        <p>
+          Ce logiciel de caisse est conçu pour une utilisation sur tablette ou ordinateur.
+          Merci d'ouvrir Kotara depuis un appareil avec un écran plus grand.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AppAuthentifie({
   restaurantId,
   typeEtablissement,
@@ -60,12 +88,12 @@ function AppAuthentifie({
       <div className="app-layout">
         <main className="app-contenu">
           <AbonnementDetail
-  planActuel="aucun"
-  dateEcheance={planExpireLe || ''}
-  expire={true}
-  onRetour={onDeconnexionCompte}
-  onChangerPlan={onChangerPlan}
-/>
+            planActuel="aucun"
+            dateEcheance={planExpireLe || ''}
+            expire={true}
+            onRetour={() => {}}
+            onChangerPlan={onChangerPlan}
+          />
         </main>
       </div>
     );
@@ -118,6 +146,7 @@ function AppAuthentifie({
 }
 
 export default function App() {
+  const estTelephone = useEstTelephone();
   const [chargement, setChargement] = useState(true);
   const [authSession, setAuthSession] = useState<AuthSession | null>(null);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -275,6 +304,7 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantId]);
 
+  if (estTelephone) return <EcranTelephoneBloque />;
   if (chargement) return <SplashScreen />;
   if (!authSession) return <LoginScreen onConnecte={() => {}} />;
 
