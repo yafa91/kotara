@@ -48,6 +48,7 @@ export default function Sidebar({
   ];
 
   const itemsVisibles = ITEMS.filter((item) => {
+    if (item.id === 'inventaire' && !estMagasin) return false;
     if (item.premium && planActuel !== 'premium') return false;
     if (vuesAutorisees && !vuesAutorisees.includes(item.id)) return false;
     return true;

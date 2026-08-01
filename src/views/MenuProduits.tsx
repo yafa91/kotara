@@ -7,7 +7,11 @@ import { formatMontant } from '../lib/formatMontant';
 import './MenuProduits.css';
 import './ScannerProduit.css';
 
-export default function MenuProduits() {
+interface MenuProduitsProps {
+  typeEtablissement?: 'restaurant' | 'magasin';
+}
+
+export default function MenuProduits({ typeEtablissement = 'restaurant' }: MenuProduitsProps) {
   const { articles, ajouterArticle, modifierArticle, supprimerArticle } = useMenu();
   const { categories } = useCategories();
   const [nom, setNom] = useState('');
@@ -155,14 +159,16 @@ export default function MenuProduits() {
           )}
           <input type="file" accept="image/*" onChange={handlePhotoChange} hidden />
         </label>
-        <button
-          type="button"
-          className="bouton-scan-camera"
-          onClick={() => setScannerOuvert(true)}
-          title="Scanner un code-barres pour préremplir la fiche"
-        >
-          <ScanLine size={20} />
-        </button>
+        {typeEtablissement === 'magasin' && (
+          <button
+            type="button"
+            className="bouton-scan-camera"
+            onClick={() => setScannerOuvert(true)}
+            title="Scanner un code-barres pour préremplir la fiche"
+          >
+            <ScanLine size={20} />
+          </button>
+        )}
         <input
           type="text"
           placeholder="Nom du plat"

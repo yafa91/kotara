@@ -46,9 +46,6 @@ function EcranTelephoneBloque() {
   return (
     <div className="app-verification-restaurant">
       <div style={{ textAlign: 'center', padding: '40px 24px' }}>
-        <p style={{ fontSize: '32px', fontWeight: 700, marginBottom: '24px' }}>
-          <span style={{ color: '#FF9500' }}>K</span>otara
-        </p>
         <h2>Kotara n'est pas disponible sur téléphone</h2>
         <p>
           Ce logiciel de caisse est conçu pour une utilisation sur tablette ou ordinateur.
@@ -114,7 +111,7 @@ function AppAuthentifie({
       case 'historique':
         return <Historique />;
       case 'menu':
-        return <MenuProduits />;
+        return <MenuProduits typeEtablissement={typeEtablissement} />;
       case 'inventaire':
         return <Inventaire />;
       case 'employes':
