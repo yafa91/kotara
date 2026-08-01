@@ -104,7 +104,7 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
 
   return (
     <div className="login-screen">
-      <a href="#" className="login-aide">Aide</a>
+      <a href="mailto:support@warabi.app" className="login-aide">Aide</a>
       <p className="login-titre">
         <span className="login-k">K</span>otara
       </p>
