@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
+import CGUCGV from './CGUCGV';
 import './LoginScreen.css';
 
 interface LoginScreenProps {
@@ -7,12 +8,14 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ onConnecte }: LoginScreenProps) {
+  const [pageAffichee, setPageAffichee] = useState<'connexion' | 'cgu'>('connexion');
   const [etape, setEtape] = useState<'saisie' | 'choixType' | 'nouveauCompte'>('saisie');
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [typeEtablissement, setTypeEtablissement] = useState<'restaurant' | 'magasin' | null>(null);
   const [nomEtablissement, setNomEtablissement] = useState('');
   const [devise, setDevise] = useState<'EUR' | 'XOF'>('EUR');
+  const [cguAccepte, setCguAccepte] = useState(false);
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState('');
   const [messageInfo, setMessageInfo] = useState('');
@@ -60,6 +63,11 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
       return;
     }
 
+    if (!cguAccepte) {
+      setErreur("Tu dois accepter les CGU et CGV pour créer ton compte.");
+      return;
+    }
+
     setChargement(true);
     try {
       // On stocke le nom, le type d'établissement et la devise dans les métadonnées
@@ -96,15 +104,30 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
         setEtape('saisie');
         setNomEtablissement('');
         setTypeEtablissement(null);
+        setCguAccepte(false);
       }
     } finally {
       setChargement(false);
     }
   };
 
+  if (pageAffichee === 'cgu') {
+    return <CGUCGV onRetour={() => setPageAffichee('connexion')} />;
+  }
+
   return (
     <div className="login-screen">
-      <a href="mailto:support@warabi.app" className="login-aide">Aide</a>
+      <div className="login-liens-haut">
+        <button
+          type="button"
+          className="login-lien-cgu-haut"
+          onClick={() => setPageAffichee('cgu')}
+        >
+          CGU/CGV
+        </button>
+        <a href="mailto:support@warabi.app" className="login-aide">Aide</a>
+      </div>
+
       <p className="login-titre">
         <span className="login-k">K</span>otara
       </p>
@@ -188,6 +211,25 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
               Franc CFA (FCFA)
             </label>
           </div>
+
+          <label className="login-cgu-checkbox">
+            <input
+              type="checkbox"
+              checked={cguAccepte}
+              onChange={(e) => setCguAccepte(e.target.checked)}
+            />
+            <span>
+              J'ai lu et j'accepte les{' '}
+              <button
+                type="button"
+                className="login-lien-cgu"
+                onClick={() => setPageAffichee('cgu')}
+              >
+                CGU et CGV
+              </button>{' '}
+              de Kotara.
+            </span>
+          </label>
 
           {erreur && <p className="login-erreur">{erreur}</p>}
 
