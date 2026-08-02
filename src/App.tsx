@@ -62,6 +62,7 @@ function AppAuthentifie({
   devise,
   planActuel,
   planExpireLe,
+  paiementEnEchec,
   onChangerPlan,
   onDeconnexionCompte,
 }: {
@@ -70,6 +71,7 @@ function AppAuthentifie({
   devise: Devise;
   planActuel: PlanActuel;
   planExpireLe: string | null;
+  paiementEnEchec: boolean;
   onChangerPlan: (plan: 'standard' | 'premium') => void;
   onDeconnexionCompte: () => void;
 }) {
@@ -131,6 +133,20 @@ function AppAuthentifie({
 
   return (
     <div className="app-layout">
+      {paiementEnEchec && (
+        <div
+          style={{
+            background: '#FFF3CD',
+            color: '#664D03',
+            padding: '10px 20px',
+            textAlign: 'center',
+            fontSize: '14px',
+            width: '100%',
+          }}
+        >
+          ⚠️ Ton dernier paiement a échoué. Vérifie ton moyen de paiement pour éviter une interruption de service.
+        </div>
+      )}
       <Sidebar
         vueActive={vueActive}
         onChangerVue={setVueActive}
@@ -154,6 +170,7 @@ export default function App() {
   const [devise, setDevise] = useState<Devise>('EUR');
   const [planActuel, setPlanActuelState] = useState<PlanActuel>(null);
   const [planExpireLe, setPlanExpireLe] = useState<string | null>(null);
+  const [paiementEnEchec, setPaiementEnEchec] = useState(false);
   const [nomRestaurantManquant, setNomRestaurantManquant] = useState(false);
   const [nomRestaurantSaisi, setNomRestaurantSaisi] = useState('');
   const [erreurRestaurant, setErreurRestaurant] = useState('');
@@ -183,7 +200,7 @@ export default function App() {
     (async () => {
       const { data: restaurantsExistants, error } = await supabase
         .from('restaurants')
-        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le')
+        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le, paiement_en_echec')
         .eq('owner_id', authSession.user.id)
         .limit(1);
 
@@ -199,6 +216,7 @@ export default function App() {
         setDevise((restaurant.devise as Devise) || 'EUR');
         setPlanActuelState((restaurant.plan_actuel as PlanActuel) ?? null);
         setPlanExpireLe(restaurant.plan_expire_le || null);
+        setPaiementEnEchec(Boolean(restaurant.paiement_en_echec));
         return;
       }
 
@@ -225,7 +243,7 @@ export default function App() {
           type_etablissement: typeDepuisMetadata || 'restaurant',
           devise: deviseDepuisMetadata || 'EUR',
         })
-        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le')
+        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le, paiement_en_echec')
         .single();
 
       if (erreurInsertion) {
@@ -240,6 +258,7 @@ export default function App() {
       setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
       setPlanActuelState((nouveauRestaurant.plan_actuel as PlanActuel) ?? null);
       setPlanExpireLe(nouveauRestaurant.plan_expire_le || null);
+      setPaiementEnEchec(Boolean(nouveauRestaurant.paiement_en_echec));
     })();
   }, [authSession]);
 
@@ -262,7 +281,7 @@ export default function App() {
         type_etablissement: typeDepuisMetadata || 'restaurant',
         devise: deviseDepuisMetadata || 'EUR',
       })
-      .select('id, type_etablissement, devise, plan_actuel, plan_expire_le')
+      .select('id, type_etablissement, devise, plan_actuel, plan_expire_le, paiement_en_echec')
       .single();
 
     if (error) {
@@ -278,6 +297,7 @@ export default function App() {
     setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
     setPlanActuelState((nouveauRestaurant.plan_actuel as PlanActuel) ?? null);
     setPlanExpireLe(nouveauRestaurant.plan_expire_le || null);
+    setPaiementEnEchec(Boolean(nouveauRestaurant.paiement_en_echec));
   };
 
   const handleDeconnexionCompte = async () => {
@@ -290,13 +310,14 @@ export default function App() {
     if (!restaurantId) return;
     const { data } = await supabase
       .from('restaurants')
-      .select('plan_actuel, plan_expire_le')
+      .select('plan_actuel, plan_expire_le, paiement_en_echec')
       .eq('id', restaurantId)
       .single();
 
     if (data) {
       setPlanActuelState((data.plan_actuel as PlanActuel) ?? null);
       setPlanExpireLe(data.plan_expire_le || null);
+      setPaiementEnEchec(Boolean(data.paiement_en_echec));
     }
   };
 
@@ -354,6 +375,7 @@ export default function App() {
         devise={devise}
         planActuel={planActuel}
         planExpireLe={planExpireLe}
+        paiementEnEchec={paiementEnEchec}
         onChangerPlan={() => rafraichirPlan()}
         onDeconnexionCompte={handleDeconnexionCompte}
       />
