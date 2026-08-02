@@ -315,10 +315,6 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
         leur interprétation ou leur exécution sera, à défaut de résolution amiable préalable,
         soumis à la compétence exclusive des tribunaux de Paris.
       </p>
-
-      <button className="cgu-cgv-retour cgu-cgv-retour-bas" onClick={onRetour}>
-        ← Retour
-      </button>
     </div>
   );
 }
