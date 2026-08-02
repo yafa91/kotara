@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import CGUCGV from './CGUCGV';
+import MentionsLegales from './MentionsLegales';
 import './LoginScreen.css';
 
 interface LoginScreenProps {
@@ -8,7 +9,7 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ onConnecte }: LoginScreenProps) {
-  const [pageAffichee, setPageAffichee] = useState<'connexion' | 'cgu'>('connexion');
+  const [pageAffichee, setPageAffichee] = useState<'connexion' | 'cgu' | 'mentions'>('connexion');
   const [etape, setEtape] = useState<'saisie' | 'choixType' | 'nouveauCompte'>('saisie');
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
@@ -70,9 +71,6 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
 
     setChargement(true);
     try {
-      // On stocke le nom, le type d'établissement et la devise dans les métadonnées
-      // du compte. Ils seront utilisés pour créer la fiche dès la première
-      // connexion réussie (après confirmation de l'email si nécessaire).
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
         password: motDePasse,
@@ -95,7 +93,6 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
       }
 
       if (data.session) {
-        // Confirmation email désactivée : on est déjà connecté
         onConnecte();
       } else {
         setMessageInfo(
@@ -111,6 +108,10 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
     }
   };
 
+  if (pageAffichee === 'mentions') {
+    return <MentionsLegales onRetour={() => setPageAffichee('connexion')} />;
+  }
+
   if (pageAffichee === 'cgu') {
     return <CGUCGV onRetour={() => setPageAffichee('connexion')} />;
   }
@@ -118,6 +119,13 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
   return (
     <div className="login-screen">
       <div className="login-liens-haut">
+        <button
+          type="button"
+          className="login-lien-cgu-haut"
+          onClick={() => setPageAffichee('mentions')}
+        >
+          Mentions légales
+        </button>
         <button
           type="button"
           className="login-lien-cgu-haut"

@@ -1,11 +1,11 @@
-.cgu-cgv {
+.mentions-legales {
   max-width: 780px;
   margin: 0 auto;
   padding: 40px 24px 60px;
   position: relative;
 }
 
-.cgu-cgv-retour {
+.mentions-legales-retour {
   background: none;
   border: none;
   color: #555;
@@ -16,32 +16,28 @@
   display: block;
 }
 
-.cgu-cgv-retour:hover {
+.mentions-legales-retour:hover {
   color: #FF9500;
 }
 
-.cgu-cgv-retour-bas {
-  margin-top: 40px;
-}
-
-.cgu-cgv-titre {
+.mentions-legales-titre {
   font-size: 48px;
   font-weight: 800;
   text-align: center;
   margin: 0 0 8px;
 }
 
-.cgu-cgv-k {
+.mentions-legales-k {
   color: #FF9500;
 }
 
-.cgu-cgv h1 {
+.mentions-legales h1 {
   font-size: 22px;
   text-align: center;
   margin: 0 0 4px;
 }
 
-.cgu-cgv-sous-titre {
+.mentions-legales-sous-titre {
   text-align: center;
   color: #777;
   font-size: 13px;
@@ -49,37 +45,16 @@
   margin-bottom: 40px;
 }
 
-.cgu-cgv h2 {
-  font-size: 19px;
-  color: #000;
-  border-bottom: 3px solid #FF9500;
-  padding-bottom: 8px;
-  margin-top: 40px;
-  margin-bottom: 16px;
-}
-
-.cgu-cgv h3 {
-  font-size: 16px;
+.mentions-legales h2 {
+  font-size: 17px;
   color: #FF9500;
-  margin-top: 24px;
-  margin-bottom: 8px;
+  margin-top: 28px;
+  margin-bottom: 10px;
 }
 
-.cgu-cgv p {
+.mentions-legales p {
   font-size: 14px;
   line-height: 1.6;
   color: #333;
   margin: 0 0 12px;
-}
-
-.cgu-cgv ul {
-  margin: 0 0 12px;
-  padding-left: 20px;
-}
-
-.cgu-cgv li {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #333;
-  margin-bottom: 6px;
 }

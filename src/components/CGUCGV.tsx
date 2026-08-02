@@ -16,7 +16,7 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       </p>
       <h1>Conditions Générales d'Utilisation et Conditions Générales de Vente</h1>
       <p className="cgu-cgv-sous-titre">
-        Édité par WARABI SAS — dernière mise à jour : [à compléter à la date de publication]
+        Édité par WARABI SAS, dernière mise à jour : [le 10 aout 2026]
       </p>
 
       <h2>PARTIE 1 — CONDITIONS GÉNÉRALES D'UTILISATION (CGU)</h2>
@@ -29,17 +29,15 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
         droits et obligations des parties dans ce cadre.
       </p>
       <p>
-        Le Service est édité par WARABI SAS, société par actions simplifiée immatriculée au
-        Registre du Commerce et des Sociétés sous le numéro SIREN 101 908 762 (SIRET
-        101 908 762 00012), dont le siège social est situé au 37 rue de la Dauphine, 91100
-        Corbeil-Essonnes, France, numéro de TVA intracommunautaire FR49 101 908 762 (ci-après
-        « l'Éditeur » ou « Warabi »).
+        Le Service est édité par WARABI SAS, société par actions simplifiée au capital de 100 euros, immatriculée au
+        Registre du Commerce et des Sociétés sous le numéro SIREN 101 908 762 (ci-après
+        « l'Éditeur » ou « WARABI »).
       </p>
 
       <h3>Article 2 — Acceptation des CGU</h3>
       <p>
         L'accès et l'utilisation du Service impliquent l'acceptation pleine et entière des
-        présentes CGU par tout utilisateur (ci-après « l'Utilisateur » ou « le Client »).
+        présentes CGU par tout utilisateur (ci-après « l'Utilisateur » ou « le client »).
         L'Utilisateur reconnaît avoir pris connaissance des présentes CGU au moment de la création
         de son compte et déclare les accepter sans réserve.
       </p>
@@ -110,7 +108,7 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
 
       <h3>Article 7 — Protection des données personnelles</h3>
       <p>
-        Warabi traite les données personnelles des Utilisateurs conformément au Règlement Général
+        WARABI traite les données personnelles des Utilisateurs conformément au Règlement Général
         sur la Protection des Données (RGPD) et à la loi Informatique et Libertés. Les données sont
         hébergées au sein de l'Union Européenne.
       </p>
@@ -123,7 +121,7 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       <p>
         Conformément à la réglementation, l'Utilisateur dispose d'un droit d'accès, de
         rectification, d'effacement, de limitation et de portabilité de ses données, qu'il peut
-        exercer en écrivant à support@warabi.app.
+        exercer en écrivant à support@WARABI.app.
       </p>
 
       <h3>Article 8 — Disponibilité du Service</h3>
@@ -184,10 +182,9 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
 
       <h3>Article 2 — Identification de l'éditeur</h3>
       <p>
-        WARABI SAS — Société par actions simplifiée au capital social de 100 € — SIREN
-        101 908 762 — SIRET 101 908 762 00012 — TVA intracommunautaire FR49 101 908 762 — Siège
-        social : 37 rue de la Dauphine, 91100 Corbeil-Essonnes, France — Contact :
-        support@warabi.app — Téléphone : +33 07 49 45 13 61.
+        WARABI SAS est une société par actions simplifiée au capital de 100 € dont le numéro SIRET est 101 908 762 00012
+        Contact : support@WARABI.app 
+        Téléphone : +33 07 49 45 13 61.
       </p>
 
       <h3>Article 3 — Description des offres</h3>
@@ -209,42 +206,42 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       <p>
         Le détail exact des fonctionnalités incluses dans chaque offre est présenté au sein de
         l'interface du Service et peut évoluer. Toute évolution substantielle des fonctionnalités
-        incluses fera l'objet d'une information préalable des Clients concernés.
+        incluses fera l'objet d'une information préalable des clients concernés.
       </p>
 
       <h3>Article 4 — Prix et modalités de paiement</h3>
       <p>
         Les prix des offres sont indiqués en euros (EUR) ou en francs CFA (XOF) selon la devise
-        associée au compte du Client, toutes taxes applicables comprises, sauf mention contraire.
+        associée au compte du client, toutes taxes applicables comprises, sauf mention contraire.
       </p>
       <p>
         Le paiement s'effectue exclusivement par carte bancaire via la plateforme de paiement
-        sécurisée Stripe. En souscrivant à une offre, le Client autorise Warabi à procéder au
+        sécurisée Stripe. En souscrivant à une offre, le client autorise WARABI à procéder au
         prélèvement automatique et récurrent du montant de l'abonnement choisi, selon une
         périodicité mensuelle, jusqu'à résiliation de l'abonnement dans les conditions de l'Article
         5.
       </p>
       <p>
-        En cas d'échec de prélèvement, Warabi ou son prestataire de paiement pourra procéder à de
+        En cas d'échec de prélèvement, WARABI ou son prestataire de paiement pourra procéder à de
         nouvelles tentatives de prélèvement selon un calendrier automatisé. À défaut de
-        régularisation dans le délai indiqué au Client, l'abonnement pourra être automatiquement
+        régularisation dans le délai indiqué au client, l'abonnement pourra être automatiquement
         résilié et l'accès aux fonctionnalités payantes du Service suspendu.
       </p>
 
       <h3>Article 5 — Durée et résiliation</h3>
       <p>
         L'abonnement est conclu sans engagement de durée et se renouvelle automatiquement chaque
-        mois par tacite reconduction, sauf résiliation par le Client.
+        mois par tacite reconduction, sauf résiliation par le client.
       </p>
       <p>
-        Le Client peut résilier son abonnement à tout moment, avec effet à la fin de la période
+        Le client peut résilier son abonnement à tout moment, avec effet à la fin de la période
         mensuelle en cours, directement depuis le Service ou via le portail de gestion
         d'abonnement mis à sa disposition. La résiliation n'ouvre droit à aucun remboursement, y
         compris partiel ou au prorata, du montant déjà réglé pour la période en cours.
       </p>
       <p>
-        Warabi se réserve le droit de résilier ou suspendre l'accès au Service en cas de
-        manquement grave du Client aux présentes CGV ou aux CGU, notamment en cas d'utilisation
+        WARABI se réserve le droit de résilier ou suspendre l'accès au Service en cas de
+        manquement grave du client aux présentes CGV ou aux CGU, notamment en cas d'utilisation
         frauduleuse ou de non-paiement persistant.
       </p>
 
@@ -259,52 +256,52 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       <p>
         Sauf disposition légale impérative contraire, aucun remboursement ne sera effectué au
         titre d'une période d'abonnement déjà facturée, y compris en cas de résiliation anticipée
-        par le Client ou de non-utilisation du Service pendant tout ou partie de la période
+        par le client ou de non-utilisation du Service pendant tout ou partie de la période
         concernée.
       </p>
 
       <h3>Article 8 — Responsabilité et garanties</h3>
       <p>
-        Warabi s'engage à fournir le Service avec diligence et selon les règles de l'art, sans
-        toutefois garantir un résultat commercial déterminé pour l'activité du Client. La
-        responsabilité de Warabi, tous préjudices confondus, est limitée au montant des sommes
-        effectivement versées par le Client au titre des trois (3) derniers mois d'abonnement
+        WARABI s'engage à fournir le Service avec diligence et selon les règles de l'art, sans
+        toutefois garantir un résultat commercial déterminé pour l'activité du client. La
+        responsabilité de WARABI, tous préjudices confondus, est limitée au montant des sommes
+        effectivement versées par le client au titre des trois (3) derniers mois d'abonnement
         précédant le fait générateur du dommage.
       </p>
       <p>
-        Warabi ne saurait être tenue responsable des pertes de données, de chiffre d'affaires ou
+        WARABI ne saurait être tenue responsable des pertes de données, de chiffre d'affaires ou
         de tout préjudice indirect résultant de l'utilisation ou de l'impossibilité d'utiliser le
         Service.
       </p>
 
-      <h3>Article 9 — Conformité fiscale et obligations du Client</h3>
+      <h3>Article 9 — Conformité fiscale et obligations du client</h3>
       <p>
-        Le Client, en sa qualité de professionnel assujetti à la TVA, demeure seul responsable du
+        Le client, en sa qualité de professionnel assujetti à la TVA, demeure seul responsable du
         respect de ses obligations légales et fiscales, notamment celles résultant de l'article
         286 I 3° bis du Code Général des Impôts relatif aux logiciels de caisse (exigences
         d'inaltérabilité, de sécurisation, de conservation et d'archivage des données de
         transaction).
       </p>
       <p>
-        Warabi met en œuvre les moyens techniques appropriés pour permettre au Client de
+        WARABI met en œuvre les moyens techniques appropriés pour permettre au client de
         satisfaire à ces obligations (conservation des données, export des transactions), sans que
-        cela ne dispense le Client de vérifier, le cas échéant avec son expert-comptable, la
+        cela ne dispense le client de vérifier, le cas échéant avec son expert-comptable, la
         conformité de son utilisation du Service à la réglementation qui lui est applicable.
       </p>
 
       <h3>Article 10 — Données et sécurité</h3>
       <p>
-        Les données du Client sont hébergées auprès de prestataires techniques tiers (hébergement
-        de base de données et hébergement applicatif) situés au sein de l'Union Européenne. Warabi
+        Les données du client sont hébergées auprès de prestataires techniques tiers (hébergement
+        de base de données et hébergement applicatif) situés au sein de l'Union Européenne. WARABI
         met en œuvre des mesures de sécurité raisonnables pour protéger l'accès et l'intégrité de
-        ces données, notamment via des règles de contrôle d'accès garantissant qu'un Client ne
+        ces données, notamment via des règles de contrôle d'accès garantissant qu'un client ne
         peut accéder qu'aux données de son propre établissement.
       </p>
 
       <h3>Article 11 — Modification des CGV</h3>
       <p>
-        Warabi se réserve le droit de modifier les présentes CGV à tout moment. Les modifications
-        substantielles, notamment tarifaires, seront notifiées aux Clients par e-mail au moins
+        WARABI se réserve le droit de modifier les présentes CGV à tout moment. Les modifications
+        substantielles, notamment tarifaires, seront notifiées aux clients par e-mail au moins
         trente (30) jours avant leur entrée en vigueur. La poursuite de l'utilisation du Service
         après cette notification vaut acceptation des nouvelles CGV.
       </p>
