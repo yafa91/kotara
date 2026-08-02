@@ -65,6 +65,7 @@ export default function AbonnementDetail({
 }: AbonnementDetailProps) {
   const devise = useDevise();
   const [chargement, setChargement] = useState<string | null>(null);
+  const [chargementPortail, setChargementPortail] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
 
   const prixAffiche = (plan: Plan) => plan.prixParDevise[devise];
@@ -101,6 +102,33 @@ export default function AbonnementDetail({
     } catch (err) {
       setErreur(err instanceof Error ? err.message : 'Une erreur est survenue');
       setChargement(null);
+    }
+  };
+
+  const handleGererAbonnement = async () => {
+    setChargementPortail(true);
+    setErreur(null);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Reconnecte-toi pour accéder à cette page.');
+
+      const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/create-portal-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Erreur lors de l'ouverture du portail.");
+      }
+
+      window.location.href = data.url;
+    } catch (err) {
+      setErreur(err instanceof Error ? err.message : 'Une erreur est survenue');
+      setChargementPortail(false);
     }
   };
 
@@ -154,6 +182,19 @@ export default function AbonnementDetail({
           );
         })}
       </div>
+
+      {planActuel !== 'aucun' && (
+        <button
+          className="abonnement-annuler"
+          onClick={handleGererAbonnement}
+          disabled={chargementPortail}
+          style={{ marginBottom: '8px' }}
+        >
+          {chargementPortail
+            ? 'Redirection...'
+            : 'Gérer mon abonnement (facture, moyen de paiement, résiliation)'}
+        </button>
+      )}
 
       <button className="abonnement-annuler" onClick={onRetour}>
         Annuler
