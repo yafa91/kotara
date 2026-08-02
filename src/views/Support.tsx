@@ -6,7 +6,7 @@ interface SupportProps {
 
 export default function Support({ planActuel }: SupportProps) {
   const handlePriseEnMain = () => {
-    window.open('https://get.teamviewer.com/kotara-support', '_blank');
+    window.open('https://meet.google.com/new', '_blank');
   };
 
   return (
@@ -18,12 +18,12 @@ export default function Support({ planActuel }: SupportProps) {
 
       <div className="support-carte">
         <p className="support-label">Email</p>
-        <p className="support-valeur">support@kotara.app</p>
+        <p className="support-valeur">support@warabi.app</p>
       </div>
 
       <div className="support-carte">
         <p className="support-label">Téléphone</p>
-        <p className="support-valeur">+33 0749451361</p>
+        <p className="support-valeur">+33 07 49 45 13 61</p>
       </div>
 
       <div className="support-carte">
@@ -36,10 +36,10 @@ export default function Support({ planActuel }: SupportProps) {
         {planActuel === 'premium' ? (
           <>
             <p className="support-description">
-              Laisse notre équipe prendre la main sur ton écran pour résoudre le problème directement.
+              Démarre une visio et partage ton écran avec notre équipe pour résoudre le problème ensemble.
             </p>
             <button className="support-bouton" onClick={handlePriseEnMain}>
-              Démarrer une session
+              Démarrer une visio
             </button>
           </>
         ) : (
