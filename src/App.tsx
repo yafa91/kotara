@@ -132,7 +132,7 @@ function AppAuthentifie({
   };
 
   return (
-    <div className="app-layout">
+    <>
       {paiementEnEchec && (
         <div
           style={{
@@ -147,17 +147,19 @@ function AppAuthentifie({
           ⚠️ Ton dernier paiement a échoué. Vérifie ton moyen de paiement pour éviter une interruption de service.
         </div>
       )}
-      <Sidebar
-        vueActive={vueActive}
-        onChangerVue={setVueActive}
-        planActuel={planActuel}
-        session={session}
-        onDeconnexionSession={handleDeconnexionSession}
-        vuesAutorisees={session.role === 'gerant' ? null : VUES_EMPLOYE}
-        typeEtablissement={typeEtablissement}
-      />
-      <main className="app-contenu">{renderVue()}</main>
-    </div>
+      <div className="app-layout">
+        <Sidebar
+          vueActive={vueActive}
+          onChangerVue={setVueActive}
+          planActuel={planActuel}
+          session={session}
+          onDeconnexionSession={handleDeconnexionSession}
+          vuesAutorisees={session.role === 'gerant' ? null : VUES_EMPLOYE}
+          typeEtablissement={typeEtablissement}
+        />
+        <main className="app-contenu">{renderVue()}</main>
+      </div>
+    </>
   );
 }
 
