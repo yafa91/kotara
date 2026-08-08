@@ -20,6 +20,7 @@ import AbonnementDetail from './views/AbonnementDetail';
 import type { Session } from './components/SelectionEmploye';
 import { AppDataProvider, useService } from './store/AppDataContext';
 import { supabase } from './lib/supabaseClient';
+import SupportChatBot from './components/SupportChatBot';
 import './App.css';
 
 const VUES_EMPLOYE: VueActive[] = ['commande', 'caisse', 'historique', 'support'];
@@ -159,6 +160,7 @@ function AppAuthentifie({
         />
         <main className="app-contenu">{renderVue()}</main>
       </div>
+      <SupportChatBot />
     </>
   );
 }

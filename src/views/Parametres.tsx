@@ -260,7 +260,7 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
           <p className="parametres-sous-titre">
             Télécharge un fichier contenant tout (menu, commandes, historique, paramètres).
             Copie-le ensuite sur une clé USB pour garder une copie de sécurité en dehors de
-            l'ordinateur.
+            l'ordinateur ou la tablette.
           </p>
           <button className="parametres-bouton" onClick={handleTelechargerSauvegarde}>
             Télécharger la sauvegarde
