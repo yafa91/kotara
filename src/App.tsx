@@ -160,7 +160,7 @@ function AppAuthentifie({
         />
         <main className="app-contenu">{renderVue()}</main>
       </div>
-      <SupportChatBot />
+      {vueActive !== 'commande' && <SupportChatBot />}
     </>
   );
 }
