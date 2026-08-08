@@ -8,9 +8,6 @@ type Message = {
   text: string;
 };
 
-// -----------------------------------------------
-// Réponses pré-écrites (statiques, pas de données)
-// -----------------------------------------------
 const REPONSES_STATIQUES: { motsCles: string[]; reponse: string }[] = [
   {
     motsCles: ["bonjour", "salut", "hello", "bonsoir"],
@@ -53,20 +50,6 @@ const REPONSES_STATIQUES: { motsCles: string[]; reponse: string }[] = [
 const REPONSE_DEFAUT =
   "Je n'ai pas de réponse pour ça. Essaie 'revenu du mois', 'stock de [produit]' ou contacte-nous à support@warabi.app.";
 
-// -----------------------------------------------
-// Questions suggérées, cliquables directement
-// -----------------------------------------------
-const QUESTIONS_SUGGEREES: string[] = [
-  "Quel est mon revenu ce mois ?",
-  "Quel est mon revenu aujourd'hui ?",
-  "Combien de commandes ce mois ?",
-  "Il reste combien de produits en stock ?",
-  "Comment changer mon code PIN ?",
-  "Comment ajouter un produit ?",
-  "Comment ajouter un employé ?",
-  "Comment te contacter ?",
-];
-
 function formaterMontant(montant: number, devise: "EUR" | "XOF") {
   if (devise === "XOF") return `${Math.round(montant).toLocaleString("fr-FR")} FCFA`;
   return `${montant.toFixed(2).replace(".", ",")} €`;
@@ -102,9 +85,6 @@ export default function SupportChatBot() {
     finRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, ouvert]);
 
-  // -----------------------------------------------
-  // Réponses dynamiques basées sur les vraies données
-  // -----------------------------------------------
   function repondreRevenu(question: string): string | null {
     if (!/(revenu|chiffre d.affaires|\bca\b|recette)/i.test(question)) return null;
 
@@ -187,23 +167,19 @@ export default function SupportChatBot() {
     return REPONSE_DEFAUT;
   }
 
-  function envoyerTexte(texte: string) {
-    const propre = texte.trim();
-    if (!propre) return;
+  function envoyer() {
+    const texte = saisie.trim();
+    if (!texte) return;
 
-    const messageUser: Message = { id: Date.now(), from: "user", text: propre };
+    const messageUser: Message = { id: Date.now(), from: "user", text: texte };
     const reponse: Message = {
       id: Date.now() + 1,
       from: "bot",
-      text: trouverReponse(propre),
+      text: trouverReponse(texte),
     };
 
     setMessages((prev) => [...prev, messageUser, reponse]);
     setSaisie("");
-  }
-
-  function envoyer() {
-    envoyerTexte(saisie);
   }
 
   function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -229,20 +205,6 @@ export default function SupportChatBot() {
             ))}
             <div ref={finRef} />
           </div>
-
-          {messages.length === 1 && (
-            <div className="chatbot-suggestions">
-              {QUESTIONS_SUGGEREES.map((q) => (
-                <button
-                  key={q}
-                  className="chatbot-suggestion"
-                  onClick={() => envoyerTexte(q)}
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
-          )}
 
           <div className="chatbot-saisie">
             <input

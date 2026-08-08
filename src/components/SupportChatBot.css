@@ -80,31 +80,6 @@
   border-bottom-right-radius: 2px;
 }
 
-.chatbot-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 0 12px 10px 12px;
-  max-height: 120px;
-  overflow-y: auto;
-}
-
-.chatbot-suggestion {
-  background: #fff4e6;
-  color: #b35c00;
-  border: 1px solid #f5941f;
-  border-radius: 16px;
-  padding: 6px 10px;
-  font-size: 12px;
-  cursor: pointer;
-  text-align: left;
-}
-
-.chatbot-suggestion:hover {
-  background: #f5941f;
-  color: white;
-}
-
 .chatbot-saisie {
   display: flex;
   border-top: 1px solid #eee;
