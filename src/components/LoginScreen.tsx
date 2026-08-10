@@ -256,6 +256,18 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
           </button>
         </form>
       )}
+
+      <p style={{
+        position: 'fixed',
+        bottom: '16px',
+        left: 0,
+        right: 0,
+        textAlign: 'center',
+        fontSize: '12px',
+        color: '#999',
+      }}>
+        Kotara © 2026 — Logiciel édité par WARABI SAS. Tous droits réservés.
+      </p>
     </div>
   );
 }
