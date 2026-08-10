@@ -7,7 +7,11 @@ import { formatMontant } from '../lib/formatMontant';
 import './PriseCommande.css';
 import './ScannerProduit.css';
 
-export default function ScannerProduit() {
+interface ScannerProduitProps {
+  employeId: string | null;
+}
+
+export default function ScannerProduit({ employeId }: ScannerProduitProps) {
   const [recherche, setRecherche] = useState('');
   const { articles } = useMenu();
   const { lignes, ajouterArticle, retirerArticle, viderTicket, total } = useTicket();
@@ -83,7 +87,7 @@ export default function ScannerProduit() {
 
   const handleImprimerEtEncaisser = async () => {
     if (lignes.length === 0 || !modePaiementChoisi) return;
-    await encaisser(lignes, total, modePaiementChoisi as ModePaiement);
+    await encaisser(lignes, total, modePaiementChoisi as ModePaiement, employeId);
     window.print();
     viderTicket();
     setTicketOuvert(false);

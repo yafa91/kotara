@@ -18,6 +18,7 @@ import SplashScreen from './components/SplashScreen';
 import LoginScreen from './components/LoginScreen';
 import AbonnementDetail from './views/AbonnementDetail';
 import type { Session } from './components/SelectionEmploye';
+import SelectionEmploye from './components/SelectionEmploye';
 import { AppDataProvider, useService } from './store/AppDataContext';
 import { supabase } from './lib/supabaseClient';
 import SupportChatBot from './components/SupportChatBot';
@@ -78,10 +79,10 @@ function AppAuthentifie({
 }) {
   const [vueActive, setVueActive] = useState<VueActive>('commande');
   const { serviceOuvertAujourdHui } = useService();
-  const [session] = useState<Session>({ nom: 'Gérant', role: 'gerant' });
+  const [session, setSession] = useState<Session | null>(null);
 
   const handleDeconnexionSession = () => {
-    onDeconnexionCompte();
+    setSession(null);
     setVueActive('commande');
   };
 
@@ -102,15 +103,31 @@ function AppAuthentifie({
     );
   }
 
+  // Aucun employé/gérant n'a encore choisi son profil pour cette session : on
+  // affiche l'écran de sélection avant de laisser accéder au logiciel. C'est
+  // ce qui permet de savoir QUI a fait chaque vente (traçabilité NF525).
+  if (!session) {
+    return (
+      <SelectionEmploye
+        onConnecte={setSession}
+        onDeconnexionCompte={onDeconnexionCompte}
+      />
+    );
+  }
+
   const renderVue = () => {
     switch (vueActive) {
       case 'commande':
         if (!serviceOuvertAujourdHui) {
           return <ServiceFerme onAllerCaisse={() => setVueActive('caisse')} />;
         }
-        return typeEtablissement === 'magasin' ? <ScannerProduit /> : <PriseCommande />;
+        return typeEtablissement === 'magasin' ? (
+          <ScannerProduit employeId={session.id} />
+        ) : (
+          <PriseCommande employeId={session.id} />
+        );
       case 'caisse':
-        return <Caisse />;
+        return <Caisse employeId={session.id} />;
       case 'historique':
         return <Historique />;
       case 'menu':

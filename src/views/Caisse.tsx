@@ -14,7 +14,11 @@ function dateDuJour() {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function Caisse() {
+interface CaisseProps {
+  employeId: string | null;
+}
+
+export default function Caisse({ employeId }: CaisseProps) {
   const { commandes, commandesEnAttente, marquerPayee } = useHistorique();
   const { serviceOuvertAujourdHui, demarrerService, cloturerServiceAvecComptage } = useService();
   const { verifierCodeAdmin } = useParametres();
@@ -114,6 +118,7 @@ export default function Caisse() {
       totalEspecesTheorique: totalEspeces,
       totalMobileMoney,
       totalGeneral: totalJour,
+      employeId,
     });
     setClotureEnCours(false);
     setModeComptage(false);
@@ -326,13 +331,13 @@ export default function Caisse() {
               <div className="carte-ticket-actions">
                 <button
                   className="bouton-encaisser bouton-espece"
-                  onClick={() => marquerPayee(commande.id, 'espece')}
+                  onClick={() => marquerPayee(commande.id, 'espece', employeId)}
                 >
                   Espèces
                 </button>
                 <button
                   className="bouton-encaisser bouton-mobile"
-                  onClick={() => marquerPayee(commande.id, 'mobile_money')}
+                  onClick={() => marquerPayee(commande.id, 'mobile_money', employeId)}
                 >
                   {labelMobileMoney}
                 </button>

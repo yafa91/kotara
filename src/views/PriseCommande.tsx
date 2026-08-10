@@ -11,7 +11,11 @@ import type { Categorie, ModePaiement } from '../types';
 import { formatMontant } from '../lib/formatMontant';
 import './PriseCommande.css';
 
-export default function PriseCommande() {
+interface PriseCommandeProps {
+  employeId: string | null;
+}
+
+export default function PriseCommande({ employeId }: PriseCommandeProps) {
   const { categories } = useCategories();
   const [categorieActive, setCategorieActive] = useState<'Tout' | Categorie>('Tout');
   const { articles } = useMenu();
@@ -39,7 +43,7 @@ export default function PriseCommande() {
     if (lignes.length === 0 || !modePaiementChoisi || enTraitement) return;
 
     setEnTraitement(true);
-    await encaisser(lignes, total, modePaiementChoisi as ModePaiement);
+    await encaisser(lignes, total, modePaiementChoisi as ModePaiement, employeId);
     setEnTraitement(false);
 
     // window.print() est bloquant : le code reprend seulement une fois

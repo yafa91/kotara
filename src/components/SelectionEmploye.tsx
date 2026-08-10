@@ -4,6 +4,7 @@ import PavePinCode from './PavePinCode';
 import './SelectionEmploye.css';
 
 export interface Session {
+  id: string | null; // null pour le gérant (pas d'entrée dans la table employes)
   nom: string;
   role: 'employe' | 'gerant';
 }
@@ -13,7 +14,7 @@ interface SelectionEmployeProps {
   onDeconnexionCompte?: () => void;
 }
 
-type CibleEmploye = { type: 'employe'; nom: string; codeAttendu: string };
+type CibleEmploye = { type: 'employe'; id: string; nom: string; codeAttendu: string };
 type CibleGerant = { type: 'gerant' };
 type Cible = CibleEmploye | CibleGerant;
 
@@ -32,7 +33,7 @@ export default function SelectionEmploye({ onConnecte, onDeconnexionCompte }: Se
 
     if (cibleChoisie.type === 'gerant') {
       if (verifierCodeAdmin(codeComplet)) {
-        onConnecte({ nom: 'Gérant', role: 'gerant' });
+        onConnecte({ id: null, nom: 'Gérant', role: 'gerant' });
       } else {
         setErreur('Code incorrect');
         setCodeSaisi('');
@@ -41,7 +42,7 @@ export default function SelectionEmploye({ onConnecte, onDeconnexionCompte }: Se
     }
 
     if (codeComplet === cibleChoisie.codeAttendu) {
-      onConnecte({ nom: cibleChoisie.nom, role: 'employe' });
+      onConnecte({ id: cibleChoisie.id, nom: cibleChoisie.nom, role: 'employe' });
     } else {
       setErreur('Code incorrect');
       setCodeSaisi('');
@@ -97,7 +98,7 @@ export default function SelectionEmploye({ onConnecte, onDeconnexionCompte }: Se
               key={emp.id}
               className="selection-employe-tuile"
               onClick={() =>
-                setCibleChoisie({ type: 'employe', nom: emp.nom, codeAttendu: emp.code })
+                setCibleChoisie({ type: 'employe', id: emp.id, nom: emp.nom, codeAttendu: emp.code })
               }
             >
               {emp.nom}

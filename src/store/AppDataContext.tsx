@@ -128,8 +128,17 @@ interface AppDataValue {
 
   commandes: Commande[];
   prochainNumero: number;
-  encaisser: (lignes: LigneTicket[], total: number, mode: ModePaiement) => Promise<number>;
-  marquerPayee: (id: string, mode: 'espece' | 'mobile_money') => Promise<void>;
+  encaisser: (
+    lignes: LigneTicket[],
+    total: number,
+    mode: ModePaiement,
+    employeId?: string | null
+  ) => Promise<number>;
+  marquerPayee: (
+    id: string,
+    mode: 'espece' | 'mobile_money',
+    employeId?: string | null
+  ) => Promise<void>;
 
   serviceOuvertAujourdHui: boolean;
   demarrerService: () => Promise<void>;
@@ -138,6 +147,7 @@ interface AppDataValue {
     totalEspecesTheorique: number;
     totalMobileMoney: number;
     totalGeneral: number;
+    employeId?: string | null;
   }) => Promise<void>;
 
   clotures: Cloture[];
@@ -494,7 +504,7 @@ export function AppDataProvider({
     );
   };
 
-  const encaisser: AppDataValue['encaisser'] = async (lignes, total, modePaiement) => {
+  const encaisser: AppDataValue['encaisser'] = async (lignes, total, modePaiement, employeId) => {
     const numero = prochainNumero;
     const maintenant = new Date().toISOString();
 
@@ -506,6 +516,7 @@ export function AppDataProvider({
       date_creation: maintenant,
       date_encaissement: modePaiement === 'en_attente' ? null : maintenant,
       total,
+      employe_id: employeId || null,
     });
 
     if (erreurInsertion) {
@@ -545,7 +556,7 @@ export function AppDataProvider({
   // nouvel enregistrement (lié à l'original via commande_parent_id) plutôt
   // que d'écraser la ligne existante avec un UPDATE. L'original reste donc
   // consultable pour toujours dans la base, intact, pour l'export/l'audit.
-  const marquerPayee: AppDataValue['marquerPayee'] = async (id, modePaiement) => {
+  const marquerPayee: AppDataValue['marquerPayee'] = async (id, modePaiement, employeId) => {
     const commandeOriginale = commandes.find((c) => c.id === id);
     if (!commandeOriginale) return;
 
@@ -562,6 +573,7 @@ export function AppDataProvider({
         date_encaissement: maintenant,
         total: commandeOriginale.total,
         commande_parent_id: id,
+        employe_id: employeId || null,
       })
       .select('*')
       .single();
@@ -598,6 +610,7 @@ export function AppDataProvider({
     totalEspecesTheorique,
     totalMobileMoney,
     totalGeneral,
+    employeId,
   }) => {
     const nouvelleCloture = {
       restaurant_id: restaurantId,
@@ -608,6 +621,7 @@ export function AppDataProvider({
       total_mobile_money: totalMobileMoney,
       total_general: totalGeneral,
       date_cloture: new Date().toISOString(),
+      employe_id: employeId || null,
     };
 
     const { data, error } = await supabase
