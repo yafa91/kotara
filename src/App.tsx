@@ -95,7 +95,7 @@ function AppAuthentifie({
             planActuel="aucun"
             dateEcheance={planExpireLe || ''}
             expire={true}
-            onRetour={() => {}}
+            onRetour={onDeconnexionCompte}
             onChangerPlan={onChangerPlan}
           />
         </main>

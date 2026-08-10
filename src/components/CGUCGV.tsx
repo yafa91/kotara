@@ -121,7 +121,7 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       <p>
         Conformément à la réglementation, l'Utilisateur dispose d'un droit d'accès, de
         rectification, d'effacement, de limitation et de portabilité de ses données, qu'il peut
-        exercer en écrivant à support@WARABI.app.
+        exercer en écrivant à support@warabi.app.
       </p>
 
       <h3>Article 8 — Disponibilité du Service</h3>
@@ -183,7 +183,7 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       <h3>Article 2 — Identification de l'éditeur</h3>
       <p>
         WARABI SAS est une société par actions simplifiée au capital de 100 € dont le numéro SIRET est 101 908 762 00012
-        Contact : support@WARABI.app 
+        Contact : support@warabi.app 
         Téléphone : +33 07 49 45 13 61.
       </p>
 
