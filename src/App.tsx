@@ -202,9 +202,9 @@ function AppAuthentifie({
             width: '100%',
           }}
         >
-          🎁 Essai gratuit — encore {joursRestantsEssai(essaiExpireLe)} jour
+          🎁 Essai gratuit encore {joursRestantsEssai(essaiExpireLe)} jour
           {joursRestantsEssai(essaiExpireLe) > 1 ? 's' : ''}. Choisis un plan à tout moment dans
-          Paramètres pour continuer sans interruption.
+          le menu paramètres pour continuer sans interruption.
         </div>
       )}
       <div className="app-layout">
