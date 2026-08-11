@@ -25,10 +25,22 @@ import SupportChatBot from './components/SupportChatBot';
 import './App.css';
 
 const VUES_EMPLOYE: VueActive[] = ['commande', 'caisse', 'historique', 'support'];
+const DUREE_ESSAI_JOURS = 4;
 
 type TypeEtablissement = 'restaurant' | 'magasin';
 type Devise = 'EUR' | 'XOF';
-type PlanActuel = 'standard' | 'premium' | null;
+type PlanActuel = 'essai' | 'standard' | 'premium' | null;
+
+function dateEssaiExpiree(essaiExpireLe: string | null) {
+  if (!essaiExpireLe) return false;
+  return new Date(essaiExpireLe) < new Date();
+}
+
+function joursRestantsEssai(essaiExpireLe: string | null) {
+  if (!essaiExpireLe) return 0;
+  const diffMs = new Date(essaiExpireLe).getTime() - Date.now();
+  return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+}
 
 function useEstTelephone() {
   const [estTelephone, setEstTelephone] = useState(
@@ -64,6 +76,7 @@ function AppAuthentifie({
   devise,
   planActuel,
   planExpireLe,
+  essaiExpireLe,
   paiementEnEchec,
   onChangerPlan,
   onDeconnexionCompte,
@@ -73,6 +86,7 @@ function AppAuthentifie({
   devise: Devise;
   planActuel: PlanActuel;
   planExpireLe: string | null;
+  essaiExpireLe: string | null;
   paiementEnEchec: boolean;
   onChangerPlan: (plan: 'standard' | 'premium') => void;
   onDeconnexionCompte: () => void;
@@ -86,14 +100,19 @@ function AppAuthentifie({
     setVueActive('commande');
   };
 
-  // Aucun plan actif : on bloque tout, sauf l'écran d'abonnement lui-même
-  if (!planActuel) {
+  const enEssai = planActuel === 'essai';
+  const essaiExpire = enEssai && dateEssaiExpiree(essaiExpireLe);
+  const accesBloque = !planActuel || essaiExpire;
+
+  // Aucun plan actif, ou essai gratuit terminé : on bloque tout, sauf
+  // l'écran d'abonnement lui-même
+  if (accesBloque) {
     return (
       <div className="app-layout">
         <main className="app-contenu">
           <AbonnementDetail
             planActuel="aucun"
-            dateEcheance={planExpireLe || ''}
+            dateEcheance={(essaiExpire ? essaiExpireLe : planExpireLe) || ''}
             expire={true}
             onRetour={onDeconnexionCompte}
             onChangerPlan={onChangerPlan}
@@ -139,11 +158,18 @@ function AppAuthentifie({
       case 'rapports':
         return <Rapports />;
       case 'comptabilite':
-        return <Comptabilite planActuel={planActuel} />;
+        // Pendant l'essai, on donne accès aux fonctionnalités Premium pour
+        // montrer tout le potentiel du logiciel.
+        return <Comptabilite planActuel={enEssai ? 'premium' : planActuel} />;
       case 'parametres':
-        return <Parametres planActuel={planActuel} onChangerPlan={onChangerPlan} />;
+        return (
+          <Parametres
+            planActuel={enEssai ? 'premium' : planActuel}
+            onChangerPlan={onChangerPlan}
+          />
+        );
       case 'support':
-        return <Support planActuel={planActuel} />;
+        return <Support planActuel={enEssai ? 'premium' : planActuel} />;
       default:
         return null;
     }
@@ -163,6 +189,22 @@ function AppAuthentifie({
           }}
         >
           ⚠️ Ton dernier paiement a échoué. Vérifie ton moyen de paiement pour éviter une interruption de service.
+        </div>
+      )}
+      {enEssai && !paiementEnEchec && (
+        <div
+          style={{
+            background: '#FFF4E6',
+            color: '#B35C00',
+            padding: '10px 20px',
+            textAlign: 'center',
+            fontSize: '14px',
+            width: '100%',
+          }}
+        >
+          🎁 Essai gratuit — encore {joursRestantsEssai(essaiExpireLe)} jour
+          {joursRestantsEssai(essaiExpireLe) > 1 ? 's' : ''}. Choisis un plan à tout moment dans
+          Paramètres pour continuer sans interruption.
         </div>
       )}
       <div className="app-layout">
@@ -191,6 +233,7 @@ export default function App() {
   const [devise, setDevise] = useState<Devise>('EUR');
   const [planActuel, setPlanActuelState] = useState<PlanActuel>(null);
   const [planExpireLe, setPlanExpireLe] = useState<string | null>(null);
+  const [essaiExpireLe, setEssaiExpireLe] = useState<string | null>(null);
   const [paiementEnEchec, setPaiementEnEchec] = useState(false);
   const [nomRestaurantManquant, setNomRestaurantManquant] = useState(false);
   const [nomRestaurantSaisi, setNomRestaurantSaisi] = useState('');
@@ -221,7 +264,9 @@ export default function App() {
     (async () => {
       const { data: restaurantsExistants, error } = await supabase
         .from('restaurants')
-        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le, paiement_en_echec')
+        .select(
+          'id, type_etablissement, devise, plan_actuel, plan_expire_le, essai_expire_le, paiement_en_echec'
+        )
         .eq('owner_id', authSession.user.id)
         .limit(1);
 
@@ -237,6 +282,7 @@ export default function App() {
         setDevise((restaurant.devise as Devise) || 'EUR');
         setPlanActuelState((restaurant.plan_actuel as PlanActuel) ?? null);
         setPlanExpireLe(restaurant.plan_expire_le || null);
+        setEssaiExpireLe(restaurant.essai_expire_le || null);
         setPaiementEnEchec(Boolean(restaurant.paiement_en_echec));
         return;
       }
@@ -256,6 +302,9 @@ export default function App() {
         return;
       }
 
+      const dateFinEssai = new Date();
+      dateFinEssai.setDate(dateFinEssai.getDate() + DUREE_ESSAI_JOURS);
+
       const { data: nouveauRestaurant, error: erreurInsertion } = await supabase
         .from('restaurants')
         .insert({
@@ -263,8 +312,12 @@ export default function App() {
           owner_id: authSession.user.id,
           type_etablissement: typeDepuisMetadata || 'restaurant',
           devise: deviseDepuisMetadata || 'EUR',
+          plan_actuel: 'essai',
+          essai_expire_le: dateFinEssai.toISOString().slice(0, 10),
         })
-        .select('id, type_etablissement, devise, plan_actuel, plan_expire_le, paiement_en_echec')
+        .select(
+          'id, type_etablissement, devise, plan_actuel, plan_expire_le, essai_expire_le, paiement_en_echec'
+        )
         .single();
 
       if (erreurInsertion) {
@@ -279,6 +332,7 @@ export default function App() {
       setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
       setPlanActuelState((nouveauRestaurant.plan_actuel as PlanActuel) ?? null);
       setPlanExpireLe(nouveauRestaurant.plan_expire_le || null);
+      setEssaiExpireLe(nouveauRestaurant.essai_expire_le || null);
       setPaiementEnEchec(Boolean(nouveauRestaurant.paiement_en_echec));
     })();
   }, [authSession]);
@@ -294,6 +348,9 @@ export default function App() {
       | Devise
       | undefined;
 
+    const dateFinEssai = new Date();
+    dateFinEssai.setDate(dateFinEssai.getDate() + DUREE_ESSAI_JOURS);
+
     const { data: nouveauRestaurant, error } = await supabase
       .from('restaurants')
       .insert({
@@ -301,8 +358,12 @@ export default function App() {
         owner_id: authSession.user.id,
         type_etablissement: typeDepuisMetadata || 'restaurant',
         devise: deviseDepuisMetadata || 'EUR',
+        plan_actuel: 'essai',
+        essai_expire_le: dateFinEssai.toISOString().slice(0, 10),
       })
-      .select('id, type_etablissement, devise, plan_actuel, plan_expire_le, paiement_en_echec')
+      .select(
+        'id, type_etablissement, devise, plan_actuel, plan_expire_le, essai_expire_le, paiement_en_echec'
+      )
       .single();
 
     if (error) {
@@ -318,6 +379,7 @@ export default function App() {
     setDevise((nouveauRestaurant.devise as Devise) || 'EUR');
     setPlanActuelState((nouveauRestaurant.plan_actuel as PlanActuel) ?? null);
     setPlanExpireLe(nouveauRestaurant.plan_expire_le || null);
+    setEssaiExpireLe(nouveauRestaurant.essai_expire_le || null);
     setPaiementEnEchec(Boolean(nouveauRestaurant.paiement_en_echec));
   };
 
@@ -331,13 +393,14 @@ export default function App() {
     if (!restaurantId) return;
     const { data } = await supabase
       .from('restaurants')
-      .select('plan_actuel, plan_expire_le, paiement_en_echec')
+      .select('plan_actuel, plan_expire_le, essai_expire_le, paiement_en_echec')
       .eq('id', restaurantId)
       .single();
 
     if (data) {
       setPlanActuelState((data.plan_actuel as PlanActuel) ?? null);
       setPlanExpireLe(data.plan_expire_le || null);
+      setEssaiExpireLe(data.essai_expire_le || null);
       setPaiementEnEchec(Boolean(data.paiement_en_echec));
     }
   };
@@ -396,6 +459,7 @@ export default function App() {
         devise={devise}
         planActuel={planActuel}
         planExpireLe={planExpireLe}
+        essaiExpireLe={essaiExpireLe}
         paiementEnEchec={paiementEnEchec}
         onChangerPlan={() => rafraichirPlan()}
         onDeconnexionCompte={handleDeconnexionCompte}
