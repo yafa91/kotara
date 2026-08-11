@@ -4,7 +4,7 @@ import { useParametres, useCategories } from '../store/AppDataContext';
 import './Parametres.css';
 
 interface ParametresProps {
-  planActuel: 'standard' | 'premium' | null;
+  planActuel: 'essai' | 'standard' | 'premium' | null;
   onChangerPlan: (plan: 'standard' | 'premium') => void;
 }
 
@@ -37,7 +37,7 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
   if (vue === 'abonnement') {
     return (
       <AbonnementDetail
-        planActuel={planActuel}
+        planActuel={planActuel === 'essai' ? 'aucun' : (planActuel ?? 'aucun')}
         dateEcheance="12 août 2026"
         expire={false}
         onRetour={() => setVue('liste')}
@@ -128,6 +128,14 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
     );
     if (confirme) supprimerCategorie(nom);
   };
+
+  const libellePlan =
+    planActuel === 'premium'
+      ? 'Premium'
+      : planActuel === 'essai'
+      ? 'Essai gratuit'
+      : 'Standard';
+  const statutPlan = planActuel === 'essai' ? "En cours d'essai" : 'Actif';
 
   return (
     <div className="parametres">
@@ -300,10 +308,8 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
         <h3>Abonnement</h3>
         <div className="abonnement-carte">
           <div className="abonnement-info">
-            <p className="abonnement-plan">
-              Plan {planActuel === 'premium' ? 'Premium' : 'Standard'}
-            </p>
-            <p className="abonnement-statut">Actif</p>
+            <p className="abonnement-plan">Plan {libellePlan}</p>
+            <p className="abonnement-statut">{statutPlan}</p>
           </div>
           <button className="abonnement-bouton" onClick={() => setVue('abonnement')}>
             Gérer l'abonnement

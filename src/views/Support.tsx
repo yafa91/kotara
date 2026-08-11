@@ -1,10 +1,12 @@
 import './Support.css';
 
 interface SupportProps {
-  planActuel: 'standard' | 'premium' | null;
+  planActuel: 'essai' | 'standard' | 'premium' | null;
 }
 
 export default function Support({ planActuel }: SupportProps) {
+  const estPremium = planActuel === 'premium' || planActuel === 'essai';
+
   const handlePriseEnMain = () => {
     window.open('https://meet.google.com/new', '_blank');
   };
@@ -33,7 +35,7 @@ export default function Support({ planActuel }: SupportProps) {
 
       <div className="support-carte support-carte-distance">
         <p className="support-label">Assistance à distance</p>
-        {planActuel === 'premium' ? (
+        {estPremium ? (
           <>
             <p className="support-description">
               Démarre une visio et partage ton écran avec notre équipe pour résoudre le problème ensemble.

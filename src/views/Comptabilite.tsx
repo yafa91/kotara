@@ -8,7 +8,7 @@ import { useDevise } from '../store/AppDataContext';
 import { formatMontant } from '../lib/formatMontant';
 
 interface ComptabiliteProps {
-  planActuel: 'standard' | 'premium' | null;
+  planActuel: 'essai' | 'standard' | 'premium' | null;
 }
 
 interface Charge {
@@ -55,7 +55,10 @@ function champCSV(valeur: string | number) {
 }
 
 export default function Comptabilite({ planActuel }: ComptabiliteProps) {
-  const estPremium = planActuel === 'premium';
+  // Les comptes en essai gratuit ont accès aux fonctionnalités Premium
+  // pendant la durée de l'essai, pour découvrir tout le potentiel du
+  // logiciel — sans que cela change l'affichage du plan réellement souscrit.
+  const estPremium = planActuel === 'premium' || planActuel === 'essai';
   const { commandes } = useHistorique();
   const { articles } = useMenu();
   const { recupererTransactionsBrutesDuMois } = useExportComptable();

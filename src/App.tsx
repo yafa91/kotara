@@ -158,18 +158,11 @@ function AppAuthentifie({
       case 'rapports':
         return <Rapports />;
       case 'comptabilite':
-        // Pendant l'essai, on donne accès aux fonctionnalités Premium pour
-        // montrer tout le potentiel du logiciel.
-        return <Comptabilite planActuel={enEssai ? 'premium' : planActuel} />;
+        return <Comptabilite planActuel={planActuel} />;
       case 'parametres':
-        return (
-          <Parametres
-            planActuel={enEssai ? 'premium' : planActuel}
-            onChangerPlan={onChangerPlan}
-          />
-        );
+        return <Parametres planActuel={planActuel} onChangerPlan={onChangerPlan} />;
       case 'support':
-        return <Support planActuel={enEssai ? 'premium' : planActuel} />;
+        return <Support planActuel={planActuel} />;
       default:
         return null;
     }
@@ -205,7 +198,7 @@ function AppAuthentifie({
           🎁 Vous êtes en essai gratuit encore {joursRestantsEssai(essaiExpireLe)} jour
           {joursRestantsEssai(essaiExpireLe) > 1 ? 's' : ''}. Choisis un plan à tout moment dans
           le menu Paramètres pour continuer sans interruption.
-        </div>
+      </div>
       )}
       <div className="app-layout">
         <Sidebar
