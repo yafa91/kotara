@@ -195,7 +195,7 @@ function AppAuthentifie({
             width: '100%',
           }}
         >
-          🎁 Vous êtes en essai gratuit encore {joursRestantsEssai(essaiExpireLe)} jour
+           Tu es en mode essai gratuit encore {joursRestantsEssai(essaiExpireLe)} jour
           {joursRestantsEssai(essaiExpireLe) > 1 ? 's' : ''}. Choisis un plan à tout moment dans
           le menu Paramètres pour continuer sans interruption.
       </div>
