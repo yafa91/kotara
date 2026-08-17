@@ -9,6 +9,10 @@ import {
 } from '../store/AppDataContext';
 import type { Categorie, ModePaiement } from '../types';
 import { formatMontant } from '../lib/formatMontant';
+import {
+  bluetoothDisponible,
+  imprimerTicketBluetooth,
+} from '../lib/imprimanteBluetooth';
 import './PriseCommande.css';
 
 interface PriseCommandeProps {
@@ -28,6 +32,8 @@ export default function PriseCommande({ employeId }: PriseCommandeProps) {
     null
   );
   const [enTraitement, setEnTraitement] = useState(false);
+  const [enTraitementBluetooth, setEnTraitementBluetooth] = useState(false);
+  const [erreurBluetooth, setErreurBluetooth] = useState('');
 
   const articlesFiltres = articles.filter(
     (a) => a.actif && (categorieActive === 'Tout' || a.categorie === categorieActive)
@@ -53,6 +59,41 @@ export default function PriseCommande({ employeId }: PriseCommandeProps) {
     viderTicket();
     setTicketOuvert(false);
     setModePaiementChoisi(null);
+  };
+
+  const handleImprimerBluetooth = async () => {
+    if (lignes.length === 0 || !modePaiementChoisi || enTraitementBluetooth) return;
+
+    setEnTraitementBluetooth(true);
+    setErreurBluetooth('');
+    try {
+      const numero = await encaisser(
+        lignes,
+        total,
+        modePaiementChoisi as ModePaiement,
+        employeId
+      );
+      await imprimerTicketBluetooth({
+        nomResto: parametres.nomResto,
+        adresseResto: parametres.adresseResto,
+        telephoneResto: parametres.telephoneResto,
+        numero,
+        lignes: lignes.map((l) => ({
+          nom: l.nom,
+          quantite: l.quantite,
+          montant: formatPrix(l.prixUnitaire * l.quantite),
+        })),
+        total: formatPrix(total),
+        modePaiement: modePaiementChoisi === 'espece' ? 'Especes' : labelMobileMoney,
+      });
+      viderTicket();
+      setTicketOuvert(false);
+      setModePaiementChoisi(null);
+    } catch (e) {
+      setErreurBluetooth(e instanceof Error ? e.message : "Erreur d'impression Bluetooth.");
+    } finally {
+      setEnTraitementBluetooth(false);
+    }
   };
 
   return (
@@ -195,6 +236,20 @@ export default function PriseCommande({ employeId }: PriseCommandeProps) {
             >
               {enTraitement ? 'Enregistrement...' : '🖨️ Imprimer le ticket'}
             </button>
+
+            {bluetoothDisponible() && (
+              <button
+                className="bouton-paiement bouton-imprimer"
+                style={{ marginTop: 8 }}
+                disabled={lignes.length === 0 || !modePaiementChoisi || enTraitementBluetooth}
+                onClick={handleImprimerBluetooth}
+              >
+                {enTraitementBluetooth
+                  ? 'Impression...'
+                  : '📶 Imprimer (imprimante Bluetooth)'}
+              </button>
+            )}
+            {erreurBluetooth && <p className="message-erreur">{erreurBluetooth}</p>}
 
             {/* Zone visible uniquement à l'impression */}
             <div className="zone-impression">

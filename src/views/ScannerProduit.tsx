@@ -4,6 +4,10 @@ import { ScanLine } from 'lucide-react';
 import { useMenu, useTicket, useHistorique, useParametres, useDevise } from '../store/AppDataContext';
 import type { ModePaiement } from '../types';
 import { formatMontant } from '../lib/formatMontant';
+import {
+  bluetoothDisponible,
+  imprimerTicketBluetooth,
+} from '../lib/imprimanteBluetooth';
 import './PriseCommande.css';
 import './ScannerProduit.css';
 
@@ -22,6 +26,8 @@ export default function ScannerProduit({ employeId }: ScannerProduitProps) {
   const [modePaiementChoisi, setModePaiementChoisi] = useState<'espece' | 'mobile_money' | null>(
     null
   );
+  const [enTraitementBluetooth, setEnTraitementBluetooth] = useState(false);
+  const [erreurBluetooth, setErreurBluetooth] = useState('');
 
   // --- Scanner caméra ---
   const [scannerOuvert, setScannerOuvert] = useState(false);
@@ -92,6 +98,41 @@ export default function ScannerProduit({ employeId }: ScannerProduitProps) {
     viderTicket();
     setTicketOuvert(false);
     setModePaiementChoisi(null);
+  };
+
+  const handleImprimerBluetooth = async () => {
+    if (lignes.length === 0 || !modePaiementChoisi || enTraitementBluetooth) return;
+
+    setEnTraitementBluetooth(true);
+    setErreurBluetooth('');
+    try {
+      const numero = await encaisser(
+        lignes,
+        total,
+        modePaiementChoisi as ModePaiement,
+        employeId
+      );
+      await imprimerTicketBluetooth({
+        nomResto: parametres.nomResto,
+        adresseResto: parametres.adresseResto,
+        telephoneResto: parametres.telephoneResto,
+        numero,
+        lignes: lignes.map((l) => ({
+          nom: l.nom,
+          quantite: l.quantite,
+          montant: formatPrix(l.prixUnitaire * l.quantite),
+        })),
+        total: formatPrix(total),
+        modePaiement: modePaiementChoisi === 'espece' ? 'Especes' : labelMobileMoney,
+      });
+      viderTicket();
+      setTicketOuvert(false);
+      setModePaiementChoisi(null);
+    } catch (e) {
+      setErreurBluetooth(e instanceof Error ? e.message : "Erreur d'impression Bluetooth.");
+    } finally {
+      setEnTraitementBluetooth(false);
+    }
   };
 
   return (
@@ -252,6 +293,20 @@ export default function ScannerProduit({ employeId }: ScannerProduitProps) {
             >
               🖨️ Imprimer le ticket
             </button>
+
+            {bluetoothDisponible() && (
+              <button
+                className="bouton-paiement bouton-imprimer"
+                style={{ marginTop: 8 }}
+                disabled={lignes.length === 0 || !modePaiementChoisi || enTraitementBluetooth}
+                onClick={handleImprimerBluetooth}
+              >
+                {enTraitementBluetooth
+                  ? 'Impression...'
+                  : '📶 Imprimer (imprimante Bluetooth)'}
+              </button>
+            )}
+            {erreurBluetooth && <p className="message-erreur">{erreurBluetooth}</p>}
 
             <div className="zone-impression">
               <p className="impression-nom">{parametres.nomResto}</p>
