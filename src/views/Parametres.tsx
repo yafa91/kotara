@@ -1,10 +1,16 @@
 import { useState } from 'react';
 import AbonnementDetail from './AbonnementDetail';
 import { useParametres, useCategories } from '../store/AppDataContext';
+import {
+  bluetoothDisponible,
+  imprimanteConnectee,
+  connecterImprimante,
+  deconnecterImprimante,
+} from '../lib/imprimanteBluetooth';
 import './Parametres.css';
 
 interface ParametresProps {
-  planActuel: 'essai' | 'standard' | 'premium' | null;
+  planActuel: 'standard' | 'premium';
   onChangerPlan: (plan: 'standard' | 'premium') => void;
 }
 
@@ -34,10 +40,15 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
   const [nouvelleCategorie, setNouvelleCategorie] = useState('');
   const [messageCategorie, setMessageCategorie] = useState('');
 
+  // Imprimante Bluetooth
+  const [imprimanteEstConnectee, setImprimanteEstConnectee] = useState(imprimanteConnectee());
+  const [enConnexionImprimante, setEnConnexionImprimante] = useState(false);
+  const [erreurImprimante, setErreurImprimante] = useState('');
+
   if (vue === 'abonnement') {
     return (
       <AbonnementDetail
-        planActuel={planActuel === 'essai' ? 'aucun' : (planActuel ?? 'aucun')}
+        planActuel={planActuel}
         dateEcheance="12 août 2026"
         expire={false}
         onRetour={() => setVue('liste')}
@@ -129,13 +140,24 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
     if (confirme) supprimerCategorie(nom);
   };
 
-  const libellePlan =
-    planActuel === 'premium'
-      ? 'Premium'
-      : planActuel === 'essai'
-      ? 'Essai gratuit'
-      : 'Standard';
-  const statutPlan = planActuel === 'essai' ? "En cours d'essai" : 'Actif';
+  const handleConnecterImprimante = async () => {
+    setErreurImprimante('');
+    setEnConnexionImprimante(true);
+    try {
+      await connecterImprimante();
+      setImprimanteEstConnectee(true);
+    } catch (e) {
+      setErreurImprimante(e instanceof Error ? e.message : 'Connexion impossible.');
+      setImprimanteEstConnectee(false);
+    } finally {
+      setEnConnexionImprimante(false);
+    }
+  };
+
+  const handleDeconnecterImprimante = () => {
+    deconnecterImprimante();
+    setImprimanteEstConnectee(false);
+  };
 
   return (
     <div className="parametres">
@@ -222,6 +244,43 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
         </div>
       </section>
 
+      {bluetoothDisponible() && (
+        <section className="parametres-section">
+          <h3>Imprimante</h3>
+          <div className="parametres-carte">
+            <p className="parametres-sous-titre">
+              Connecte ton imprimante thermique Bluetooth une seule fois ici — elle restera
+              utilisable pour imprimer les tickets tant que le Bluetooth reste actif.
+            </p>
+            <div className="parametres-actions">
+              <span className="parametres-message" style={{ fontWeight: 600 }}>
+                {imprimanteEstConnectee ? '✅ Imprimante connectée' : '⚪ Aucune imprimante connectée'}
+              </span>
+            </div>
+            <div className="parametres-actions">
+              {imprimanteEstConnectee ? (
+                <button className="parametres-bouton" onClick={handleDeconnecterImprimante}>
+                  Déconnecter
+                </button>
+              ) : (
+                <button
+                  className="parametres-bouton"
+                  onClick={handleConnecterImprimante}
+                  disabled={enConnexionImprimante}
+                >
+                  {enConnexionImprimante ? 'Connexion...' : 'Connecter une imprimante Bluetooth'}
+                </button>
+              )}
+              {erreurImprimante && (
+                <span className="parametres-message parametres-message-erreur">
+                  {erreurImprimante}
+                </span>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="parametres-section">
         <h3>Sécurité</h3>
         <div className="parametres-carte">
@@ -268,7 +327,7 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
           <p className="parametres-sous-titre">
             Télécharge un fichier contenant tout (menu, commandes, historique, paramètres).
             Copie-le ensuite sur une clé USB pour garder une copie de sécurité en dehors de
-            l'ordinateur ou la tablette.
+            l'ordinateur.
           </p>
           <button className="parametres-bouton" onClick={handleTelechargerSauvegarde}>
             Télécharger la sauvegarde
@@ -308,8 +367,10 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
         <h3>Abonnement</h3>
         <div className="abonnement-carte">
           <div className="abonnement-info">
-            <p className="abonnement-plan">Plan {libellePlan}</p>
-            <p className="abonnement-statut">{statutPlan}</p>
+            <p className="abonnement-plan">
+              Plan {planActuel === 'premium' ? 'Premium' : 'Standard'}
+            </p>
+            <p className="abonnement-statut">Actif</p>
           </div>
           <button className="abonnement-bouton" onClick={() => setVue('abonnement')}>
             Gérer l'abonnement
