@@ -90,14 +90,17 @@ async function envoyerOctets(octets: Uint8Array): Promise<void> {
   }
 }
 
-// Retire les accents et remplace le symbole € (mal supporté par la plupart
-// de ces imprimantes en UTF-8) : beaucoup de ces imprimantes n'affichent pas
-// correctement l'UTF-8 (elles attendent un encodage type PC850).
+// Retire les accents, remplace le symbole € (mal supporté en UTF-8 par la
+// plupart de ces imprimantes), et remplace les espaces "spéciales" que
+// toLocaleString('fr-FR') insère (espace insécable, espace fine insécable...)
+// par de vraies espaces ASCII — sinon ces caractères multi-octets sont mal
+// interprétés par l'imprimante et cassent l'alignement des lignes.
 function pourImprimante(texte: string): string {
   return texte
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/€/g, 'EUR');
+    .replace(/€/g, 'EUR')
+    .replace(/[\u00a0\u2000-\u200b\u202f\u205f\u3000]/g, ' ');
 }
 
 const LARGEUR_PAPIER = 32; // caractères par ligne sur du papier 58mm, police standard
