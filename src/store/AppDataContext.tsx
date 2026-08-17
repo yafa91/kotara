@@ -17,6 +17,7 @@ type TypeEtablissement = 'restaurant' | 'magasin';
 interface Parametres {
   nomResto: string;
   adresseResto: string;
+  siret: string;
   telephoneResto: string;
   codeAdmin: string;
   logoUrl?: string;
@@ -320,6 +321,7 @@ export function AppDataProvider({
   const [parametres, setParametres] = useState<Parametres>({
     nomResto: '',
     adresseResto: '',
+    siret: '',
     telephoneResto: '',
     codeAdmin: '1234',
     identifiantCompte: 'admin',
@@ -352,7 +354,7 @@ export function AppDataProvider({
         supabase
           .from('restaurants')
           .select(
-            'nom, adresse, telephone, code_admin, identifiant_compte, mot_de_passe_compte, categories, prochain_numero, service_ouvert, service_date'
+            'nom, adresse, siret, telephone, code_admin, identifiant_compte, mot_de_passe_compte, categories, prochain_numero, service_ouvert, service_date'
           )
           .eq('id', restaurantId)
           .single(),
@@ -387,6 +389,7 @@ export function AppDataProvider({
         setParametres({
           nomResto: restau.nom || '',
           adresseResto: restau.adresse || '',
+          siret: restau.siret || '',
           telephoneResto: restau.telephone || '',
           codeAdmin: restau.code_admin || '1234',
           identifiantCompte: restau.identifiant_compte || 'admin',
@@ -405,13 +408,6 @@ export function AppDataProvider({
       if (erreurCmds) {
         console.error('Erreur chargement commandes :', erreurCmds.message);
       } else {
-        // Inaltérabilité : chaque changement d'état d'un ticket (ex: passage
-        // "en attente" -> "payé") crée un NOUVEL enregistrement en base plutôt
-        // que de modifier l'original (voir marquerPayee). L'original reste
-        // donc intact pour toujours (traçabilité complète), mais on ne veut
-        // afficher dans l'app que la version la plus récente de chaque ticket.
-        // On masque donc ici les enregistrements qui ont été "remplacés" par
-        // un enregistrement plus récent (identifiés via commande_parent_id).
         const brut = cmds || [];
         const idsRemplaces = new Set(
           brut.map((c: any) => c.commande_parent_id).filter(Boolean)
@@ -448,6 +444,7 @@ export function AppDataProvider({
     const payload: Record<string, unknown> = {};
     if (changements.nomResto !== undefined) payload.nom = changements.nomResto;
     if (changements.adresseResto !== undefined) payload.adresse = changements.adresseResto;
+    if (changements.siret !== undefined) payload.siret = changements.siret;
     if (changements.telephoneResto !== undefined) payload.telephone = changements.telephoneResto;
     if (changements.codeAdmin !== undefined) payload.code_admin = changements.codeAdmin;
     if (changements.identifiantCompte !== undefined)
@@ -551,11 +548,6 @@ export function AppDataProvider({
     return numero;
   };
 
-  // Inaltérabilité : on ne modifie JAMAIS un enregistrement de commande déjà
-  // créé. Pour faire passer un ticket "en attente" à "payé", on INSÈRE un
-  // nouvel enregistrement (lié à l'original via commande_parent_id) plutôt
-  // que d'écraser la ligne existante avec un UPDATE. L'original reste donc
-  // consultable pour toujours dans la base, intact, pour l'export/l'audit.
   const marquerPayee: AppDataValue['marquerPayee'] = async (id, modePaiement, employeId) => {
     const commandeOriginale = commandes.find((c) => c.id === id);
     if (!commandeOriginale) return;
@@ -583,8 +575,6 @@ export function AppDataProvider({
       return;
     }
 
-    // On remplace uniquement l'AFFICHAGE dans l'état local (l'enregistrement
-    // "en_attente" d'origine, lui, reste intact et inchangé en base).
     setCommandes((prev) =>
       prev.map((c) => (c.id === id ? ligneCommandeVersCommande(data) : c))
     );
@@ -714,10 +704,6 @@ export function AppDataProvider({
   };
 
   // ---- EXPORT COMPTABLE (archivage) ----
-  // Va chercher TOUTES les lignes brutes en base pour un mois donné, y
-  // compris les enregistrements "remplacés" (ex: anciens statuts "en_attente"
-  // conservés grâce à l'inaltérabilité) — nécessaire pour un export complet
-  // exploitable en cas de contrôle fiscal.
   const recupererTransactionsBrutesDuMois: AppDataValue['recupererTransactionsBrutesDuMois'] =
     async (cleMois) => {
       const [annee, mois] = cleMois.split('-').map(Number);

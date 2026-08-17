@@ -22,6 +22,7 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
   // Infos du restaurant
   const [nomResto, setNomResto] = useState(parametres.nomResto);
   const [adresseResto, setAdresseResto] = useState(parametres.adresseResto);
+  const [siret, setSiret] = useState(parametres.siret);
   const [telephoneResto, setTelephoneResto] = useState(parametres.telephoneResto);
   const [messageInfos, setMessageInfos] = useState('');
 
@@ -58,7 +59,7 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
   }
 
   const handleEnregistrerInfos = () => {
-    modifierParametres({ nomResto, adresseResto, telephoneResto });
+    modifierParametres({ nomResto, adresseResto, siret, telephoneResto });
     setMessageInfos('Enregistré ✅');
     setTimeout(() => setMessageInfos(''), 2000);
   };
@@ -180,6 +181,15 @@ export default function Parametres({ planActuel, onChangerPlan }: ParametresProp
               type="text"
               value={adresseResto}
               onChange={(e) => setAdresseResto(e.target.value)}
+            />
+          </label>
+          <label className="parametres-champ">
+            <span>Numéro SIRET</span>
+            <input
+              type="text"
+              value={siret}
+              onChange={(e) => setSiret(e.target.value)}
+              placeholder="Ex: 123 456 789 00012"
             />
           </label>
           <label className="parametres-champ">

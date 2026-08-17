@@ -90,25 +90,30 @@ async function envoyerOctets(octets: Uint8Array): Promise<void> {
   }
 }
 
-// Retire les accents : beaucoup de ces imprimantes n'affichent pas correctement
-// l'UTF-8 (elles attendent un encodage type PC850). On simplifie pour rester lisible.
-function sansAccents(texte: string): string {
-  return texte.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+// Retire les accents et remplace le symbole € (mal supporté par la plupart
+// de ces imprimantes en UTF-8) : beaucoup de ces imprimantes n'affichent pas
+// correctement l'UTF-8 (elles attendent un encodage type PC850).
+function pourImprimante(texte: string): string {
+  return texte
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/€/g, 'EUR');
 }
 
 const LARGEUR_PAPIER = 32; // caractères par ligne sur du papier 58mm, police standard
 
 function ligneAvecMontant(gauche: string, droite: string): string {
-  const g = sansAccents(gauche);
-  const d = sansAccents(droite);
+  const g = pourImprimante(gauche);
+  const d = pourImprimante(droite);
   const espace = Math.max(1, LARGEUR_PAPIER - g.length - d.length);
   return g + ' '.repeat(espace) + d + '\n';
 }
 
+// Le centrage est délégué à l'imprimante (commande ESC a 1) : on ne doit PAS
+// ajouter de padding manuel ici, sinon les deux centrages s'additionnent et
+// le texte apparaît décalé au lieu d'être centré.
 function ligneCentree(texte: string): string {
-  const t = sansAccents(texte);
-  const espace = Math.max(0, Math.floor((LARGEUR_PAPIER - t.length) / 2));
-  return ' '.repeat(espace) + t + '\n';
+  return pourImprimante(texte) + '\n';
 }
 
 interface LigneImpression {
@@ -158,7 +163,7 @@ function construireCommandesTicket(ticket: TicketAImprimer): Uint8Array {
 
   texte('\n');
   push(0x1b, 0x61, 0x01); // centré
-  texte(ligneCentree(`Reglement : ${sansAccents(ticket.modePaiement)}`));
+  texte(ligneCentree(`Reglement : ${pourImprimante(ticket.modePaiement)}`));
 
   texte('\n\n\n\n'); // marge pour pouvoir déchirer le papier à la main
 
