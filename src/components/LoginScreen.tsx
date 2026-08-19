@@ -139,20 +139,6 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
         >
           Découvrir
         </button>
-        <button
-          type="button"
-          className="login-lien-cgu-haut"
-          onClick={() => setPageAffichee('mentions')}
-        >
-          Mentions légales
-        </button>
-        <button
-          type="button"
-          className="login-lien-cgu-haut"
-          onClick={() => setPageAffichee('cgu')}
-        >
-          CGU/CGV
-        </button>
         <a href="mailto:support@warabi.app" className="login-aide">Aide</a>
       </div>
 
@@ -286,7 +272,6 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
         fontSize: '12px',
         color: '#999',
       }}>
-        Kotara © 2026, Logiciel édité par WARABI SAS. Tous droits réservés.
       </p>
     </div>
   );
