@@ -78,6 +78,38 @@ function EcranTelephoneBloque() {
   );
 }
 
+function useEstPortrait() {
+  const calculer = () =>
+    typeof window !== 'undefined' ? window.innerHeight > window.innerWidth : false;
+
+  const [estPortrait, setEstPortrait] = useState(calculer);
+
+  useEffect(() => {
+    const verifier = () => setEstPortrait(calculer());
+    window.addEventListener('resize', verifier);
+    window.addEventListener('orientationchange', verifier);
+    return () => {
+      window.removeEventListener('resize', verifier);
+      window.removeEventListener('orientationchange', verifier);
+    };
+  }, []);
+
+  return estPortrait;
+}
+
+function EcranPortraitBloque() {
+  return (
+    <div className="app-verification-restaurant">
+      <div style={{ textAlign: 'center', padding: '40px 24px' }}>
+        <h2>Tourne ton appareil</h2>
+        <p>
+          Kotara s'utilise en mode paysage. Fais pivoter ta tablette pour continuer.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 function AppAuthentifie({
   restaurantId,
   typeEtablissement,
@@ -227,6 +259,7 @@ function AppAuthentifie({
 
 export default function App() {
   const estTelephone = useEstTelephone();
+  const estPortrait = useEstPortrait();
   const [chargement, setChargement] = useState(true);
   const [authSession, setAuthSession] = useState<AuthSession | null>(null);
   const [restaurantId, setRestaurantId] = useState<string | null>(null);
@@ -420,9 +453,17 @@ export default function App() {
   // connexion (avec "Découvrir" comme écran par défaut) reste accessible sur
   // téléphone. C'est LoginScreen lui-même qui affiche le message "continue
   // sur tablette" au moment où l'utilisateur arrive à l'étape connexion.
-  if (!authSession) return <LoginScreen onConnecte={() => {}} estTelephone={estTelephone} />;
+  if (!authSession)
+    return (
+      <LoginScreen
+        onConnecte={() => {}}
+        estTelephone={estTelephone}
+        estPortrait={estPortrait}
+      />
+    );
 
   if (estTelephone) return <EcranTelephoneBloque />;
+  if (estPortrait) return <EcranPortraitBloque />;
 
   if (nomRestaurantManquant) {
     return (
