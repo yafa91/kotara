@@ -406,9 +406,15 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [restaurantId]);
 
-  if (estTelephone) return <EcranTelephoneBloque />;
   if (chargement) return <SplashScreen />;
-  if (!authSession) return <LoginScreen onConnecte={() => {}} />;
+
+  // Le blocage téléphone ne s'applique plus qu'à partir d'ici : la page de
+  // connexion (avec "Découvrir" comme écran par défaut) reste accessible sur
+  // téléphone. C'est LoginScreen lui-même qui affiche le message "continue
+  // sur tablette" au moment où l'utilisateur arrive à l'étape connexion.
+  if (!authSession) return <LoginScreen onConnecte={() => {}} estTelephone={estTelephone} />;
+
+  if (estTelephone) return <EcranTelephoneBloque />;
 
   if (nomRestaurantManquant) {
     return (

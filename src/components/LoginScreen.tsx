@@ -2,14 +2,18 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 import CGUCGV from './CGUCGV';
 import MentionsLegales from './MentionsLegales';
+import DecouvrirKotara from './DecouvrirKotara';
 import './LoginScreen.css';
 
 interface LoginScreenProps {
   onConnecte: () => void;
+  estTelephone?: boolean;
 }
 
-export default function LoginScreen({ onConnecte }: LoginScreenProps) {
-  const [pageAffichee, setPageAffichee] = useState<'connexion' | 'cgu' | 'mentions'>('connexion');
+export default function LoginScreen({ onConnecte, estTelephone = false }: LoginScreenProps) {
+  const [pageAffichee, setPageAffichee] = useState<
+    'connexion' | 'cgu' | 'mentions' | 'decouvrir'
+  >('decouvrir');
   const [etape, setEtape] = useState<'saisie' | 'choixType' | 'nouveauCompte'>('saisie');
   const [email, setEmail] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
@@ -116,9 +120,42 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
     return <CGUCGV onRetour={() => setPageAffichee('connexion')} />;
   }
 
+  if (pageAffichee === 'decouvrir') {
+    return <DecouvrirKotara onRetour={() => setPageAffichee('connexion')} />;
+  }
+
+  if (estTelephone) {
+    return (
+      <div className="app-verification-restaurant">
+        <div style={{ textAlign: 'center', padding: '40px 24px' }}>
+          <h2>Continue sur tablette</h2>
+          <p>
+            Kotara est un logiciel de caisse conçu pour une utilisation sur tablette ou
+            ordinateur. Merci de te connecter depuis un appareil avec un écran plus grand.
+          </p>
+          <button
+            type="button"
+            className="login-lien-cgu-haut"
+            style={{ marginTop: 16 }}
+            onClick={() => setPageAffichee('decouvrir')}
+          >
+            ← Retour à la découverte de Kotara
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="login-screen">
       <div className="login-liens-haut">
+        <button
+          type="button"
+          className="login-lien-cgu-haut"
+          onClick={() => setPageAffichee('decouvrir')}
+        >
+          Découvrir
+        </button>
         <button
           type="button"
           className="login-lien-cgu-haut"
@@ -266,7 +303,7 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
         fontSize: '12px',
         color: '#999',
       }}>
-        Kotara © 2026 — Logiciel édité par WARABI SAS. Tous droits réservés.
+        Kotara © 2026, Logiciel édité par WARABI SAS. Tous droits réservés.
       </p>
     </div>
   );
