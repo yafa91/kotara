@@ -16,7 +16,7 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       </p>
       <h1>Conditions Générales d'Utilisation et Conditions Générales de Vente</h1>
       <p className="cgu-cgv-sous-titre">
-        Édité par WARABI SAS, dernière mise à jour : [le 10 aout 2026]
+       Dernière mise à jour le 18 aout 2026
       </p>
 
       <h2>PARTIE 1 — CONDITIONS GÉNÉRALES D'UTILISATION (CGU)</h2>

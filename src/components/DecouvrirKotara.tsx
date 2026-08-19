@@ -384,6 +384,9 @@ export default function DecouvrirKotara({ onRetour, onMentionsLegales, onCGU }: 
           <button type="button" style={styles.footerLien} onClick={onCGU}>
             CGU/CGV
           </button>
+          <a href="mailto:support@warabi.app" style={styles.footerLien}>
+            Aide
+          </a>
         </div>
         <p style={styles.footerTexte}>
           Kotara © 2026, Logiciel édité par WARABI SAS. Tous droits réservés.
