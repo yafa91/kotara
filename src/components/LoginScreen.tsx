@@ -112,11 +112,11 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
   };
 
   if (pageAffichee === 'mentions') {
-    return <MentionsLegales onRetour={() => setPageAffichee('connexion')} />;
+    return <MentionsLegales onRetour={() => setPageAffichee('decouvrir')} />;
   }
 
   if (pageAffichee === 'cgu') {
-    return <CGUCGV onRetour={() => setPageAffichee('connexion')} />;
+    return <CGUCGV onRetour={() => setPageAffichee('decouvrir')} />;
   }
 
   if (pageAffichee === 'decouvrir') {
