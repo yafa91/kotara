@@ -129,47 +129,6 @@ export default function LoginScreen({ onConnecte }: LoginScreenProps) {
     );
   }
 
-  if (estTelephone) {
-    return (
-      <div className="app-verification-restaurant">
-        <div style={{ textAlign: 'center', padding: '40px 24px' }}>
-          <h2>Continue sur tablette</h2>
-          <p>
-            Kotara est un logiciel de caisse conçu pour une utilisation sur tablette ou
-            ordinateur. Merci de te connecter depuis un appareil avec un écran plus grand.
-          </p>
-          <button
-            type="button"
-            className="login-lien-cgu-haut"
-            style={{ marginTop: 16 }}
-            onClick={() => setPageAffichee('decouvrir')}
-          >
-            ← Retour à la découverte de Kotara
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (estPortrait) {
-    return (
-      <div className="app-verification-restaurant">
-        <div style={{ textAlign: 'center', padding: '40px 24px' }}>
-          <h2>Tourne ta tablette</h2>
-          <p>Kotara s'utilise en mode paysage. Fais pivoter ton appareil pour continuer.</p>
-          <button
-            type="button"
-            className="login-lien-cgu-haut"
-            style={{ marginTop: 16 }}
-            onClick={() => setPageAffichee('decouvrir')}
-          >
-            Retour à la découverte de Kotara
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="login-screen">
       <div className="login-liens-haut">
