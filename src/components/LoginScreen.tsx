@@ -7,15 +7,9 @@ import './LoginScreen.css';
 
 interface LoginScreenProps {
   onConnecte: () => void;
-  estTelephone?: boolean;
-  estPortrait?: boolean;
 }
 
-export default function LoginScreen({
-  onConnecte,
-  estTelephone = false,
-  estPortrait = false,
-}: LoginScreenProps) {
+export default function LoginScreen({ onConnecte }: LoginScreenProps) {
   const [pageAffichee, setPageAffichee] = useState<
     'connexion' | 'cgu' | 'mentions' | 'decouvrir'
   >('decouvrir');
@@ -169,7 +163,7 @@ export default function LoginScreen({
             style={{ marginTop: 16 }}
             onClick={() => setPageAffichee('decouvrir')}
           >
-            ← Retour à la découverte de Kotara
+            Retour à la découverte de Kotara
           </button>
         </div>
       </div>

@@ -118,6 +118,8 @@ function AppAuthentifie({
   planExpireLe,
   essaiExpireLe,
   paiementEnEchec,
+  estTelephone,
+  estPortrait,
   onChangerPlan,
   onDeconnexionCompte,
 }: {
@@ -128,6 +130,8 @@ function AppAuthentifie({
   planExpireLe: string | null;
   essaiExpireLe: string | null;
   paiementEnEchec: boolean;
+  estTelephone: boolean;
+  estPortrait: boolean;
   onChangerPlan: (plan: 'standard' | 'premium') => void;
   onDeconnexionCompte: () => void;
 }) {
@@ -165,6 +169,14 @@ function AppAuthentifie({
   // Aucun employé/gérant n'a encore choisi son profil pour cette session : on
   // affiche l'écran de sélection avant de laisser accéder au logiciel. C'est
   // ce qui permet de savoir QUI a fait chaque vente (traçabilité NF525).
+  //
+  // Le blocage téléphone/portrait n'intervient qu'ICI, une fois le plan
+  // choisi et payé : l'inscription et le paiement restent accessibles sur
+  // téléphone (plus simple pour le gérant), seule l'utilisation réelle de
+  // la caisse exige une tablette en mode paysage.
+  if (estTelephone) return <EcranTelephoneBloque />;
+  if (estPortrait) return <EcranPortraitBloque />;
+
   if (!session) {
     return (
       <SelectionEmploye
@@ -457,13 +469,8 @@ export default function App() {
     return (
       <LoginScreen
         onConnecte={() => {}}
-        estTelephone={estTelephone}
-        estPortrait={estPortrait}
       />
     );
-
-  if (estTelephone) return <EcranTelephoneBloque />;
-  if (estPortrait) return <EcranPortraitBloque />;
 
   if (nomRestaurantManquant) {
     return (
@@ -509,6 +516,8 @@ export default function App() {
         planExpireLe={planExpireLe}
         essaiExpireLe={essaiExpireLe}
         paiementEnEchec={paiementEnEchec}
+        estTelephone={estTelephone}
+        estPortrait={estPortrait}
         onChangerPlan={() => rafraichirPlan()}
         onDeconnexionCompte={handleDeconnexionCompte}
       />
