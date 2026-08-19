@@ -121,7 +121,13 @@ export default function LoginScreen({ onConnecte, estTelephone = false }: LoginS
   }
 
   if (pageAffichee === 'decouvrir') {
-    return <DecouvrirKotara onRetour={() => setPageAffichee('connexion')} />;
+    return (
+      <DecouvrirKotara
+        onRetour={() => setPageAffichee('connexion')}
+        onMentionsLegales={() => setPageAffichee('mentions')}
+        onCGU={() => setPageAffichee('cgu')}
+      />
+    );
   }
 
   if (estTelephone) {

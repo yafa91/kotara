@@ -2,6 +2,8 @@ import appScreenshot from '../assets/appscreen.jpg';
 
 interface DecouvrirKotaraProps {
   onRetour: () => void;
+  onMentionsLegales: () => void;
+  onCGU: () => void;
 }
 
 const styles = {
@@ -142,7 +144,22 @@ const styles = {
   footerTexte: {
     fontSize: 12,
     color: '#999',
-    margin: 0,
+    margin: '0 0 10px',
+  } as React.CSSProperties,
+  footerLiens: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: 20,
+    marginBottom: 12,
+  } as React.CSSProperties,
+  footerLien: {
+    background: 'none',
+    border: 'none',
+    fontSize: 12.5,
+    color: '#5B6B62',
+    cursor: 'pointer',
+    padding: 0,
+    textDecoration: 'underline',
   } as React.CSSProperties,
   screenSection: {
     maxWidth: 1000,
@@ -203,7 +220,7 @@ const styles = {
   } as React.CSSProperties,
 };
 
-export default function DecouvrirKotara({ onRetour }: DecouvrirKotaraProps) {
+export default function DecouvrirKotara({ onRetour, onMentionsLegales, onCGU }: DecouvrirKotaraProps) {
   return (
     <div style={styles.page}>
       <div style={styles.header}>
@@ -214,7 +231,7 @@ export default function DecouvrirKotara({ onRetour }: DecouvrirKotaraProps) {
 
       <div style={styles.hero}>
         <p style={styles.eyebrow}>Pour restaurants et boutiques</p>
-        <h1 style={styles.h1}>Ta caisse tient sur un téléphone.</h1>
+        <h1 style={styles.h1}>Ta caisse tient sur un tablette.</h1>
         <p style={styles.lead}>
           Prise de commande, caisse, menu, stock et comptabilité dans un seul logiciel, en euro
           ou en franc CFA, sans matériel à acheter.
@@ -360,6 +377,14 @@ export default function DecouvrirKotara({ onRetour }: DecouvrirKotaraProps) {
       </div>
 
       <div style={styles.footer}>
+        <div style={styles.footerLiens}>
+          <button type="button" style={styles.footerLien} onClick={onMentionsLegales}>
+            Mentions légales
+          </button>
+          <button type="button" style={styles.footerLien} onClick={onCGU}>
+            CGU/CGV
+          </button>
+        </div>
         <p style={styles.footerTexte}>
           Kotara © 2026, Logiciel édité par WARABI SAS. Tous droits réservés.
         </p>
