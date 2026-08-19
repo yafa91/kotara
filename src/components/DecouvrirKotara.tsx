@@ -159,7 +159,7 @@ const styles = {
     color: '#5B6B62',
     cursor: 'pointer',
     padding: 0,
-    textDecoration: 'underline',
+    textDecoration: 'none',
   } as React.CSSProperties,
   screenSection: {
     maxWidth: 1000,
@@ -231,7 +231,7 @@ export default function DecouvrirKotara({ onRetour, onMentionsLegales, onCGU }: 
 
       <div style={styles.hero}>
         <p style={styles.eyebrow}>Pour restaurants et boutiques</p>
-        <h1 style={styles.h1}>Ta caisse tient sur un tablette.</h1>
+        <h1 style={styles.h1}>Ta caisse tient sur une tablette.</h1>
         <p style={styles.lead}>
           Prise de commande, caisse, menu, stock et comptabilité dans un seul logiciel, en euro
           ou en franc CFA, sans matériel à acheter.
