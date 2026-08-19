@@ -42,15 +42,23 @@ function joursRestantsEssai(essaiExpireLe: string | null) {
   return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
 }
 
+function detecterTelephone(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent;
+  // iPhone : détecté directement.
+  // Android : "Mobile" dans le user agent = téléphone ; son absence = tablette.
+  // iPad (iPadOS 13+) s'identifie comme "Macintosh" et n'est donc jamais
+  // détecté ici, comme les ordinateurs — c'est voulu.
+  const estIphone = /iPhone|iPod/i.test(ua);
+  const estAndroidTelephone = /Android/i.test(ua) && /Mobile/i.test(ua);
+  return estIphone || estAndroidTelephone;
+}
+
 function useEstTelephone() {
-  const [estTelephone, setEstTelephone] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
-  );
+  const [estTelephone, setEstTelephone] = useState(() => detecterTelephone());
 
   useEffect(() => {
-    const verifier = () => setEstTelephone(window.innerWidth < 768);
-    window.addEventListener('resize', verifier);
-    return () => window.removeEventListener('resize', verifier);
+    setEstTelephone(detecterTelephone());
   }, []);
 
   return estTelephone;

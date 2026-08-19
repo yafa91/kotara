@@ -325,7 +325,7 @@ export default function DecouvrirKotara({ onRetour, onMentionsLegales, onCGU }: 
           <p style={styles.eyebrow}>L'interface</p>
           <h2 style={styles.screenTitre}>Pensée pour aller vite pendant le rush.</h2>
           <p style={styles.screenLead}>
-            Gros boutons, catégories claires, panier toujours visible — conçue pour être
+            Gros boutons, catégories claires, panier toujours visible et conçue pour être
             utilisée d'une main, entre deux commandes.
           </p>
           <ul style={styles.screenListe}>
