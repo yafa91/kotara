@@ -16,7 +16,7 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       </p>
       <h1>Conditions Générales d'Utilisation et Conditions Générales de Vente</h1>
       <p className="cgu-cgv-sous-titre">
-       Dernière mise à jour le 18 aout 2026
+       Dernière mise à jour le 19 aout 2026
       </p>
 
       <h2>PARTIE 1 — CONDITIONS GÉNÉRALES D'UTILISATION (CGU)</h2>
@@ -194,13 +194,15 @@ export default function CGUCGV({ onRetour }: CGUCGVProps) {
       </p>
       <ul>
         <li>
-          Offre Standard — 20 € / mois (ou 15 000 FCFA / mois selon la devise du compte) : prise
-          de commande, gestion de caisse, gestion du menu et des produits, 1 point de vente.
+          Offre Standard — 29,99 € / mois (ou 22 000 FCFA / mois selon la devise du compte) :
+          prise de commande, gestion de caisse, gestion du menu et des produits, 1 point de
+          vente, tablette et imprimante fournies.
         </li>
         <li>
-          Offre Premium — 49 € / mois (ou 26 000 FCFA / mois selon la devise du compte) :
+          Offre Premium — 49,99 € / mois (ou 38 000 FCFA / mois selon la devise du compte) :
           l'ensemble des fonctionnalités de l'offre Standard, rapports avancés, gestion
-          multi-employés, support prioritaire, points de vente illimités.
+          multi-employés, support prioritaire, points de vente illimités, tablette et imprimante
+          fournies.
         </li>
       </ul>
       <p>

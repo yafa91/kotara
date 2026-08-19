@@ -344,13 +344,14 @@ export default function DecouvrirKotara({ onRetour, onMentionsLegales, onCGU }: 
             <p style={{ fontSize: 13.5, color: '#5B6B62', margin: 0 }}>
               Pour démarrer sans complexité
             </p>
-            <p style={styles.planPrix}>20 €/mois</p>
-            <p style={styles.planPrixAlt}>ou 15 000 FCFA / mois</p>
+            <p style={styles.planPrix}>29,99 €/mois</p>
+            <p style={styles.planPrixAlt}>ou 22 000 FCFA / mois</p>
             <ul style={styles.planListe}>
               <li style={styles.planItem}>✓ Prise de commande &amp; caisse</li>
               <li style={styles.planItem}>✓ Menu et scan code-barres</li>
               <li style={styles.planItem}>✓ Inventaire avec alertes</li>
               <li style={styles.planItem}>✓ 1 point de vente</li>
+              <li style={styles.planItem}>✓ Tablette + imprimante fournies</li>
             </ul>
           </div>
           <div style={{ ...styles.plan, border: '1px solid #16221D', background: '#F1ECE1' }}>
@@ -358,13 +359,14 @@ export default function DecouvrirKotara({ onRetour, onMentionsLegales, onCGU }: 
             <p style={{ fontSize: 13.5, color: '#5B6B62', margin: 0 }}>
               Pour piloter plusieurs équipes
             </p>
-            <p style={styles.planPrix}>49 €/mois</p>
-            <p style={styles.planPrixAlt}>ou 26 000 FCFA / mois</p>
+            <p style={styles.planPrix}>49,99 €/mois</p>
+            <p style={styles.planPrixAlt}>ou 38 000 FCFA / mois</p>
             <ul style={styles.planListe}>
               <li style={styles.planItem}>✓ Tout le plan Standard</li>
               <li style={styles.planItem}>✓ Rapports avancés</li>
               <li style={styles.planItem}>✓ Gestion multi-employés</li>
               <li style={styles.planItem}>✓ Points de vente illimités</li>
+              <li style={styles.planItem}>✓ Tablette + imprimante fournies</li>
             </ul>
           </div>
         </div>

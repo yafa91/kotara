@@ -18,22 +18,23 @@ const PLANS: Plan[] = [
     id: 'standard',
     nom: 'Standard',
     prixParDevise: {
-      EUR: '20 € / mois',
-      XOF: '15 000 FCFA / mois',
+      EUR: '29,99 € / mois',
+      XOF: '22 000 FCFA / mois',
     },
     fonctionnalites: [
       'Prise de commande',
       'Gestion de caisse',
       'Menu et produits',
       '1 point de vente',
+      'Tablette + imprimante fournies',
     ],
   },
   {
     id: 'premium',
     nom: 'Premium',
     prixParDevise: {
-      EUR: '49 € / mois',
-      XOF: '26 000 FCFA / mois',
+      EUR: '49,99 € / mois',
+      XOF: '38 000 FCFA / mois',
     },
     fonctionnalites: [
       'Tout le plan Standard',
@@ -41,11 +42,12 @@ const PLANS: Plan[] = [
       'Gestion multi-employés',
       'Support prioritaire',
       'Points de vente illimités',
+      'Tablette + imprimante fournies',
     ],
   },
 ];
 
-// ⚠️ Remplace par l'URL de ton projet Supabase (visible dans Project Settings > API)
+// Remplace par l'URL de ton projet Supabase (visible dans Project Settings > API)
 const SUPABASE_FUNCTIONS_URL = 'https://oiongrhqunlrzfuinjmy.supabase.co/functions/v1';
 
 interface AbonnementDetailProps {
@@ -97,7 +99,6 @@ export default function AbonnementDetail({
         throw new Error(data.error || 'Erreur lors de la création de la session de paiement');
       }
 
-      // Redirige vers la page de paiement hébergée par Stripe
       window.location.href = data.url;
     } catch (err) {
       setErreur(err instanceof Error ? err.message : 'Une erreur est survenue');
