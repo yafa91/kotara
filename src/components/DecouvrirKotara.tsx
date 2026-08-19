@@ -66,7 +66,7 @@ const styles = {
   },
   grille: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
     gap: 1,
     background: 'rgba(22,34,29,0.1)',
     border: '1px solid rgba(22,34,29,0.1)',
