@@ -64,7 +64,7 @@ function useEstTelephone() {
   return estTelephone;
 }
 
-function EcranTelephoneBloque() {
+function EcranTelephoneBloque({ onOk }: { onOk: () => void }) {
   return (
     <div className="app-verification-restaurant">
       <div style={{ textAlign: 'center', padding: '40px 24px' }}>
@@ -73,6 +73,23 @@ function EcranTelephoneBloque() {
           Ce logiciel de caisse est conçu pour une utilisation sur tablette ou ordinateur.
           Merci d'ouvrir Kotara depuis un appareil avec un écran plus grand.
         </p>
+        <button
+          type="button"
+          onClick={onOk}
+          style={{
+            marginTop: 16,
+            background: '#F2801E',
+            color: 'white',
+            border: 'none',
+            borderRadius: 9,
+            padding: '11px 28px',
+            fontSize: 14.5,
+            fontWeight: 600,
+            cursor: 'pointer',
+          }}
+        >
+          OK
+        </button>
       </div>
     </div>
   );
@@ -174,7 +191,7 @@ function AppAuthentifie({
   // choisi et payé : l'inscription et le paiement restent accessibles sur
   // téléphone (plus simple pour le gérant), seule l'utilisation réelle de
   // la caisse exige une tablette en mode paysage.
-  if (estTelephone) return <EcranTelephoneBloque />;
+  if (estTelephone) return <EcranTelephoneBloque onOk={onDeconnexionCompte} />;
   if (estPortrait) return <EcranPortraitBloque />;
 
   if (!session) {
