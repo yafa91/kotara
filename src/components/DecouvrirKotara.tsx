@@ -239,7 +239,7 @@ export default function DecouvrirKotara({ onRetour, onMentionsLegales, onCGU }: 
 
         <div style={styles.ticket}>
           <div style={{ textAlign: 'center', marginBottom: 10 }}>
-            <div style={{ fontWeight: 600, fontSize: 13 }}>CHEZ MAMA KOTARA</div>
+            <div style={{ fontWeight: 600, fontSize: 13 }}>Fall's Burger</div>
             <div style={{ fontSize: 10.5, color: '#5B6B62', marginTop: 2 }}>
               Ticket n°214 · 12:41
             </div>
